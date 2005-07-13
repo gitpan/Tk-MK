@@ -1,0 +1,49 @@
+Revision history for Perl extension Tk-MK.
+
+0.01  Wed Oct  9 01:05:05 2002
+            - original version; created by h2xs 1.21
+			  with options -Afn Tk-MK
+
+      Initial release (local use only)
+
+      o modules are running, initial pod is done
+	
+		
+0.02  Tue Dec 10 15:41:33 MET 2002
+
+      new release (local use only)
+
+      o some bugfixes, added a new class 'ExtHList'
+	    as a more powerful listbox than even 'ExtListbox',
+		featuring a item/data list with images, etc. , ...
+
+0.03  Fri Jan 16 11:35:13 MET 2004
+
+      new release
+	  
+	  o added the HListplus class (HList with column resizing)
+
+	  o renamed ExtHList -> DataHList, ExtTree DataTree for
+	    making the names more self-explanatory
+
+0.04 Mon Jan 17 21:34:53 MET 2005
+
+      new release (local use only)
+
+	  o 1 new module added Tk::Buttonplus - Button with Text AND Image
+
+0.05 Mon May 02 22:01:28 MET 2005
+
+      new release (local use only)
+
+	  o enhanced Tk::Checkbox to support user-customizable size
+
+0.06 Mon Jun 13 23:52:14 MET 2005
+
+      new release (local use only)
+
+	  o enhanced Tk::Optionbox - added second hierarchy for the options
+
+---------------------------------------------------------------
+
+TODO: Still some more work needed on the tests ...

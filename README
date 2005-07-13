@@ -1,0 +1,81 @@
+Tk-MK version 0.06
+==================
+
+Files in Tk-MK are my personal favorite Tk-add-ons. developed in the
+past as a side effect of a huge perl project.
+
+
+INCLUDED WIDGETS
+
+	Tk::Buttonplus   - extended Tk::Button with ability to show a bitmap/image AND a text label
+	Tk::HListplus    - extended Tk::HList with movable columns based on ResizeButton.pm
+	Tk::DataHList    - extended Tk::HList with data column and ability of sorting, ...  
+	Tk::DataTree     - extended Tk::Tree widget with data column and ability of sorting, ... 
+	Tk::Checkbox     - a nice alternative to the standard check-button widget
+	Tk::Optionbox    - a nice alternative to the default MenuButton (more flexible with graphics-only)
+	Tk::Statusbox    - a view-a-status-by-colors widget with flashing ,...
+	Tk::BootSplash   - an improved Splash screen based on Stephen.O.Lidie's Splashscreen.pm
+	Tk::ResizeButton - an reworked alternative HList-Header-Button for resizing
+
+
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+
+DEPENDENCIES
+
+This module requires Tk800.x preferable Tk800.024
+
+
+COPYRIGHT AND LICENCE
+
+This package is free software and is provided "as is"
+without expressed or implied warranty.  It may be used,
+redistributed and/or modified under the terms of the Perl
+(see Perls Artistic License for details).
+
+Copyright (C) 2002 - 2005 Michael Krause <KrauseM@gmx.net>
+
+
+
+HISTORY:
+
+ Version 0.01 Initial release
+
+	o modules are running, initial pod is done
+
+ Version 0.02 Update release
+
+	o 2 new modules added Tk::ExtTree, Tk::ExtHList
+	
+
+ Version 0.03 Update release
+
+	o renamed Tk::ExtTree -> Tk::DataTree, Tk::ExtHList -> Tk::DataHList
+	  for making the names more intuitive
+	  
+	o added 2 new modules added Tk::HListplus, Tk::BootSplash,
+	   (and the stand-alone Tk::ResizeButton for completeness)
+	
+
+ Version 0.04 Update release
+
+	o 1 new module added Tk::Buttonplus - Button with Text AND Image
+
+ Version 0.05 Update release
+
+	o enhanced Tk::Checkbox to support user-customizable size
+
+ Version 0.06 Update release
+
+	o enhanced Tk::Optionbox - added second hierarchy for the options
+
+
+__END__
