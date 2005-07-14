@@ -269,8 +269,6 @@ standard Button, if you need to display a bitmap/image B<AND> a text label.
 
 for details on supported methods  - see B<Tk::Button>
 
-=back
-
 
 =head1 OPTIONS
 

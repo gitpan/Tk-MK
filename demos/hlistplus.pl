@@ -1,7 +1,19 @@
-#!perl
-use strict;
-use Tk;
+#!/usr/local/bin/perl -w
+######################################## SOH ###########################################
+## Function : Replacement for Tk:Optionmenu (more flexible handling for 'image_only')
+##
+## Copyright (c) 2002-2005 Michael Krause. All rights reserved.
+## This program is free software; you can redistribute it and/or modify it
+## under the same terms as Perl itself.
+######################################## SOH ###########################################
 
+##############################################
+### Use
+##############################################
+use strict;
+
+# graphical stuff
+use Tk;
 use Tk::ItemStyle;
 use Tk::HListplus;
 use Tk::DialogBox;
@@ -100,45 +112,44 @@ use Tk::DialogBox;
 	# the Double-Click does NOT work !!
 	# But, Using $test_frame2 (one hierarchy up) DOES !! strange??!! 
     #my $hlist = $test_frame3->Scrolled('HListplus',
-    my $hlist = $test_frame2->Scrolled('HListplus',
+    my $hlist2 = $test_frame2->Scrolled('HListplus',
          -columns=>3, 
          -header => 1
          )->pack(-side => 'left', -expand => 'yes', -fill => 'both');
 
     # CREATE COLUMN HEADER 0
-    my $headerstyle   = $hlist->ItemStyle('window', -padx => 0, -pady => 0);
-   # my $headerstyle   = $hlist->ItemStyle('window', -padx => 0, -pady => 0);
+    my $headerstyle2   = $hlist2->ItemStyle('window', -padx => 0, -pady => 0);
 
-   $hlist->headerCreate(0, 
+   $hlist2->headerCreate(0, 
  #  $hlist->header('create', 0, 
 			-itemtype => 'resizebutton',
-			#-style => $headerstyle,
+			#-style => $headerstyle2,
 			-text => 'Test Name', 
 			-activeforeground => 'blue',
     );
 
     # CREATE COLUMN HEADER 1
-    $hlist->header('create', 1,
+    $hlist2->header('create', 1,
 			-itemtype => 'resizebutton',
-		#	-style    =>$headerstyle,
+		#	-style    =>$headerstyle2,
 			-text => 'Status', 
 			-buttondownrelief => 'sunken',
 			-activebackground => 'orange',
     );
     # CREATE COLUMN HEADER 2
-    $hlist->header('create', 2,
+    $hlist2->header('create', 2,
 			-itemtype => 'resizebutton',
-		#	-style    =>$headerstyle,
+		#	-style    =>$headerstyle2,
 			-text => 'dummy', 
 			-command => sub { print "Hello, world!\n" }, 
     );
 	foreach (qw/zzz yyy xxx www vvv uuu ttt/) {
-		$hlist->add($_);
-		$hlist->itemCreate($_, 0, -text => $_);
-		$hlist->itemCreate($_, 1, -text => $_);
-		$hlist->itemCreate($_, 2, -text => $_);
+		$hlist2->add($_);
+		$hlist2->itemCreate($_, 0, -text => $_);
+		$hlist2->itemCreate($_, 1, -text => $_);
+		$hlist2->itemCreate($_, 2, -text => $_);
 	}
-	$hlist->bind('<Double-1>', sub {print "hello\n"; } );
+	$hlist2->bind('<Double-1>', sub {print "hello\n"; } );
 
 
 MainLoop;

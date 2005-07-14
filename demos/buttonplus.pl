@@ -1,4 +1,11 @@
-#!/home/opcdev/local/bin/perl -w
+#!/usr/local/bin/perl -w
+######################################## SOH ###########################################
+## Function : Replacement for Tk:Optionmenu (more flexible handling for 'image_only')
+##
+## Copyright (c) 2002-2005 Michael Krause. All rights reserved.
+## This program is free software; you can redistribute it and/or modify it
+## under the same terms as Perl itself.
+######################################## SOH ###########################################
 
 ##############################################
 ### Use
@@ -7,8 +14,7 @@ use strict;
 
 # graphical stuff
 use Tk;
-use Tk::widgets qw/Button/;
-use Tk::IButton;
+use Tk::Buttonplus;
 
 # Create a new TopLevelWidget
 my $mw = MainWindow::->new;
@@ -67,11 +73,21 @@ MainLoop();
 
 sub bttn_pressed_cb1
 {
-	print "bttn_pressed_cb1: hallo: [@_]\n";
+	print "bttn_pressed_cb1: hello world 1: [@_]\n";
 	
 }
 sub bttn_pressed_cb2
 {
-	print "bttn_pressed_cb2: hallo: [@_]\n";
-	$_[0]->configure(-state => ($_[0]->cget('-state') eq 'normal' ? 'disabled' : 'normal'));
+	print "bttn_pressed_cb2: hello world 2: [@_]\n";
+	my $new_state = $_[0]->cget('-state');
+	$_[0]->configure(-state => $new_state eq 'normal' ? 'disabled' : 'normal');
+	# just for demo purposes use the global var instead of a more complicated deref'ing
+	$new_state =~ s/d$//; 
+	$bt2->configure(-text => ucfirst($new_state) );
 }
+
+
+###
+### EOF
+###
+

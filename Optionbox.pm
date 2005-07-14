@@ -1,7 +1,7 @@
 ######################################## SOH ###########################################
 ## Function : Replacement for Tk:Optionmenu (more flexible handling for 'image_only')
 ##
-## Copyright (c) 2002-2004 Michael Krause. All rights reserved.
+## Copyright (c) 2002-2005 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
 ## under the same terms as Perl itself.
 ##
@@ -370,7 +370,7 @@ Michael Krause, <KrauseM@gmx.net>
 
 This code may be distributed under the same conditions as Perl.
 
-V1.4  (C) Jun 2005
+V1.4  (C) June 2005
 
 =cut
 

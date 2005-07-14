@@ -112,13 +112,13 @@ sub variable {
 		$this->{watch} = Tie::Watch->new(-variable => $vref, -store => $st);
 		$this->{watch_variable} = $vref;
 		# Remove the Watchpoint after it's no more needed
-    	$this->OnDestroy( [sub {$_[0]->{watch}->Unwatch}, $this] );
+    	$this->OnDestroy( sub { $this->{watch}->Unwatch if $this->{watch} } );
 
 		# Preset will the current var-value
 		$this->color($$vref);
 	}
 	elsif ( (scalar @_ ) > 1 ) {
-		$this->{watch}->Unwatch if (defined $this->{watch});
+		$this->{watch}->Unwatch if $this->{watch};
 	}
 	
 	# Return sth useful for -cget questionares

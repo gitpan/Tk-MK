@@ -387,7 +387,7 @@ sub variable {
     $this->{watch} = Tie::Watch->new(-variable => $vref, -store => $st);
 	
 	# Remove the Watchpoint after it's no more needed
-    $this->OnDestroy( [sub {$_[0]->{watch}->Unwatch}, $this] );
+	$this->OnDestroy( sub { $this->{watch}->Unwatch if $this->{watch} } );
 
 	# Preset will the current var-value
 	$this->set($$vref);

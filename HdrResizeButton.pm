@@ -1,4 +1,4 @@
-package Tk::ResizeButton;
+package Tk::HdrResizeButton;
 #------------------------------------------------
 # automagically updated versioning variables -- CVS modifies these!
 #------------------------------------------------
@@ -12,11 +12,11 @@ $CheckinDate =~ s/^\$\S+:\s*(.*?)\s*\$$/$1/sx;
 $CheckinUser =~ s/^\$\S+:\s*(.*?)\s*\$$/$1/sx;
 
 #-------------------------------------------------
-#-- package Tk::ResizeButton ---------------------
+#-- package Tk::HdrResizeButton ---------------------
 #-------------------------------------------------
 
 #########################################################################
-# Tk::ResizeButton 
+# Tk::HdrResizeButton 
 # Summary:  This widget creates a button for use in an HList header which
 #           provides methods for resizing a column. This was heavily 
 #	    leveraged from Columns.pm by Damion Wilson.
@@ -39,7 +39,7 @@ $CheckinUser =~ s/^\$\S+:\s*(.*?)\s*\$$/$1/sx;
 use base qw(Tk::Derived Tk::Button);
 use strict;
 
-Construct Tk::Widget 'ResizeButton';
+Construct Tk::Widget 'HdrResizeButton';
 
 sub ClassInit
 {
@@ -306,14 +306,14 @@ __END__
 
 =head1 NAME
 
-Tk::ResizeButton - provides a resizeable button to be used in an HList
+Tk::HdrResizeButton - provides a resizeable button to be used in an HList
 column header.
 
 =head1 SYNOPSIS
 
     use Tk;
     use Tk::HList;
-    use Tk::ResizeButton;
+    use Tk::HdrResizeButton;
 
     my $mw = MainWindow->new();
 
@@ -325,7 +325,7 @@ column header.
 
     # CREATE COLUMN HEADER 0
     my $headerstyle   = $hlist->ItemStyle('window', -padx => 0, -pady => 0);
-    my $header0 = $hlist->ResizeButton( 
+    my $header0 = $hlist->HdrResizeButton( 
           -text => 'Test Name', 
           -relief => 'flat', -pady => 0, 
           -command => sub { print "Hello, world!\n";}, 
@@ -338,7 +338,7 @@ column header.
     );
 
     # CREATE COLUMN HEADER 1
-    my $header1 = $hlist->ResizeButton( 
+    my $header1 = $hlist->HdrResizeButton( 
           -text => 'Status', 
           -command => sub { print "Hello, world!\n";}, 
           -column => 1
@@ -351,7 +351,7 @@ column header.
 
 =head1 DESCRIPTION
 
-The ResizeButton widget provides a resizeable button widget for use
+The HdrResizeButton widget provides a resizeable button widget for use
 in an HList column header.  When placed in the column header, the right
 edge of the widget can be selected and dragged to a new location to
 change the size of the HList column.  When resizing the column, a 
@@ -368,7 +368,7 @@ Note: For a proper operationthe following option MUST be specified during creati
 
 =item B<-column>
 
-The column number that this ResizeButton is associated with.
+The column number that this HdrResizeButton is associated with.
 (It has to be provided to resize the appropriate column).
 
 =back
@@ -380,7 +380,7 @@ In addition, the following options may be specified:
 =item B<-command>
 
 The default command is associated with an open/close function for the selected
-column. The function is called with a Tk::ResizeButton reference for custom usage.
+column. The function is called with a Tk::HdrResizeButton reference for custom usage.
 
 =item B<-activebackground>
 

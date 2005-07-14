@@ -1,4 +1,4 @@
-Tk-MK version 0.06
+Tk-MK version 0.07
 ==================
 
 Files in Tk-MK are my personal favorite Tk-add-ons. developed in the
@@ -7,15 +7,15 @@ past as a side effect of a huge perl project.
 
 INCLUDED WIDGETS
 
-	Tk::Buttonplus   - extended Tk::Button with ability to show a bitmap/image AND a text label
-	Tk::HListplus    - extended Tk::HList with movable columns based on ResizeButton.pm
-	Tk::DataHList    - extended Tk::HList with data column and ability of sorting, ...  
-	Tk::DataTree     - extended Tk::Tree widget with data column and ability of sorting, ... 
-	Tk::Checkbox     - a nice alternative to the standard check-button widget
-	Tk::Optionbox    - a nice alternative to the default MenuButton (more flexible with graphics-only)
-	Tk::Statusbox    - a view-a-status-by-colors widget with flashing ,...
-	Tk::BootSplash   - an improved Splash screen based on Stephen.O.Lidie's Splashscreen.pm
-	Tk::ResizeButton - an reworked alternative HList-Header-Button for resizing
+	Tk::Buttonplus      - extended Tk::Button with ability to show a bitmap/image AND a text label
+	Tk::HListplus       - extended Tk::HList with movable columns based on ResizeButton.pm
+	Tk::DataHList       - extended Tk::HList with data column and ability of sorting, ...  
+	Tk::DataTree        - extended Tk::Tree widget with data column and ability of sorting, ... 
+	Tk::Checkbox        - a nice alternative to the standard check-button widget
+	Tk::Optionbox       - a nice alternative to the default MenuButton (more flexible with graphics-only)
+	Tk::Statusbox       - a view-a-status-by-colors widget with flashing ,...
+	Tk::BootSplash      - an improved Splash screen based on Stephen.O.Lidie's Splashscreen.pm
+	Tk::HdrResizeButton - an reworked alternative HList-Header-Button (based on Tk::ResizeButton) for resizing
 
 
 
@@ -77,5 +77,9 @@ HISTORY:
 
 	o enhanced Tk::Optionbox - added second hierarchy for the options
 
+ Version 0.07 Bugfix release
+
+	o fixed Tk::HListplus - was complaining with Tk 804.xxx
+	o fixed inconsistency in buttonplus-demo
 
 __END__
