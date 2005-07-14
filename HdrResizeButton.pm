@@ -306,8 +306,7 @@ __END__
 
 =head1 NAME
 
-Tk::HdrResizeButton - provides a resizeable button to be used in an HList
-column header.
+Tk::HdrResizeButton - provides a resizeable button for a HList column header.
 
 =head1 SYNOPSIS
 

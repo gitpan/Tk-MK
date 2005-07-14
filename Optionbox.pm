@@ -197,8 +197,7 @@ __END__
 
 =head1 NAME
 
-Tk::Optionbox - Yet Another Optionmenu widget (more flexible for
-using button with graphics-only)
+Tk::Optionbox - Another pop-up option-widget (with second-level selections)
 
 =head1 SYNOPSIS
 

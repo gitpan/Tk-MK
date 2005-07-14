@@ -44,10 +44,20 @@ Revision history for Perl extension Tk-MK.
 
 	  o enhanced Tk::Optionbox - added second hierarchy for the options
 
-0.07 Thu Jul 14 17:15:35 MEST 2005
+0.07 Thu Jul 14 10:15:35 MEST 2005
+
      bug fix release
+
 	 o enhanced Hlistplus for Tk804.xxx
+
 	 o cleaned install-kit, demo programs
+
+0.08 Thu Jul 14 18:53:58 MEST 2005
+
+	 update release
+
+	 o updated the pod docs
+
 
 ---------------------------------------------------------------
 

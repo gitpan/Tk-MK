@@ -205,9 +205,7 @@ __END__
 
 =head1 NAME
 
-Tk::Statusbox - A (framed) status area that might be recolored easily
- and/or flash for indicating some operational status.
- Fully configurable (size, borders, reliefs, ...)
+Tk::Statusbox - A recolorable status area (box) that also can flash
 
 =head1 SYNOPSIS
 

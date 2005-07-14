@@ -194,8 +194,7 @@ __END__
 
 =head1 NAME
 
-Tk::Buttonplus - Yet Another Button widget (A replacement for the
-standard Button that allows using a bitmap/image B<AND> a text label
+Tk::Buttonplus - Enhanced Button widget with a bitmap/image B<AND> a text label
 
 =head1 SYNOPSIS
 

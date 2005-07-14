@@ -580,8 +580,7 @@ __END__
 
 =head1 NAME
 
-Tk::DataHList - Another Listbox derived widget that supports setting/
-retrieval and viewing of belonging data beside the main list-items
+Tk::DataHList - A HList widget with a visible/hidden data column
 
 =head1 SYNOPSIS
 

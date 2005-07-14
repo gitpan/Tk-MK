@@ -463,8 +463,7 @@ __END__
 
 =head1 NAME
 
-Tk::Checkbox - Yet Another Checkbutton widget (check-button-like
- but with a wider area and a nice marker)
+Tk::Checkbox - Yet Another Checkbutton widget (with a sizable marker)
 
 =head1 SYNOPSIS
 

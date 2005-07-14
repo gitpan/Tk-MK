@@ -409,8 +409,7 @@ __END__
 
 =head1 NAME
 
-Tk::HListplus - Another HList derived widget that supports resizing,
-opening and closing of columns, taking benefit from TK::(Header)ResizeButton
+Tk::HListplus - A HList that supports resizing, open & close of columns
 
 =head1 SYNOPSIS
 

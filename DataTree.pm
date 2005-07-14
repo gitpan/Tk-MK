@@ -634,8 +634,7 @@ __END__
 
 =head1 NAME
 
-Tk::DataTree - Another Listtree derived widget that supports setting/
-retrieval and viewing of belonging data beside the main list-items
+Tk::DataTree - A Tree widget with a visible/hidden data column
 
 =head1 SYNOPSIS
 
