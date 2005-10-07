@@ -407,7 +407,7 @@ B<Shaun Wandler> <wandler@unixmail.compaq.com>
 =head1 UPDATES
 
 Updated by Slaven Rezic and Frank Herrmann,
-Enhanced/Modified by Michael Krause <KrauseM@gmx.net>
+Enhanced/Modified by Michael Krause KrauseM_AT_gmx_DOT_net
 
 =over 4
 

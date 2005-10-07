@@ -11,6 +11,9 @@
 ##            V1.3  16-Dec-2004 	Added multicolumn & activate option (-rows/-activate option) MK.
 ##            V1.4  14-Jun-2005 	Added second hierarchy for the options,
 ##                                  Optionformat: [ label, value], [[keylabel, \@subopts], undef], [], ... MK.
+##            V1.5  29-Jul-2005 	Added columnbreak for second hierarchy options
+##            V1.6  14-Sep-2005 	Rewrite: Added TRUE multi-level hierarchy options with color opts. MK
+##            V1.7  30-Sep-2005 	Added selection-validate operation. MK
 ##
 ######################################## EOH ###########################################
 package Tk::Optionbox;
@@ -26,7 +29,7 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '1.4';
+$VERSION = '1.7';
 
 use base qw (Tk::Derived Tk::Menubutton);
 
@@ -45,148 +48,235 @@ sub ClassInit {
 
 #---------------------------------------------
 sub Populate {
+	# Parameters
 	my ($this, $args) = @_;
+
+	# Locals
+	my ($var, $menu, %defaults, %all_presets, $value);
+	local $_;
 
 	# Check whether we're in backward compatibility mode
 	unless (defined $args->{-image}) {
 		$args->{-indicatoron} = 1;
 		$this->{no_image} = 1;
 	}
-
+	
 	$this->SUPER::Populate ($args);
 	
 	# Create a Closure for saving the current value
-	my $var = delete $args->{-textvariable};
+	$var = delete $args->{-textvariable};
 	unless (defined $var) {
 		my $gen = undef;
 		$var = \$gen;
 	}
 	$this->configure(-textvariable => $var);
 
-	#Create the widget	
-	my ($menu) = $this->Menu();
-	$this->configure(-menu => $menu);
-	
-	$this->ConfigSpecs(
+	# Setup DEFAULT Configs
+	%defaults = (
     	-takefocus			=> ['SELF', 'takefocus', 'Takefocus', 1],
     	-highlightthickness	=> ['SELF', 'highlightThickness', 'HighlightThickness', 1],
     	-borderwidth		=> [['SELF', 'PASSIVE'], 'borderwidth', 'BorderWidth', 2],
     	-relief				=> [['SELF', 'PASSIVE'], 'relief', 'Relief', 'raised'],
     	-anchor				=> [['SELF', 'PASSIVE'], 'anchor', 'Anchor', 'w'],
      	-direction 			=> [['SELF', 'PASSIVE'], 'direction', 'Direction', 'flush'],
-    	-font				=> [['SELF', $menu], undef, undef, undef],
+    	-font				=> [['SELF', 'PASSIVE'], 'font', 'Font', 'Helvetica 12 bold'],
     	-variable 			=> ['PASSIVE', undef, undef, undef],
     	-tearoff 			=> ['PASSIVE', 'tearoff', 'TearOff', 1],
-    	-activate 			=> ['PASSIVE', 'activate', 'Activate', 1],
     	-rows	 			=> ['PASSIVE', 'rows', 'Rows', 20],
+    	-activate 			=> ['PASSIVE', 'activate', 'Activate', 1],
+    	-separator 			=> ['PASSIVE', 'separator', 'Separator', '.'],
     	-options 			=> ['METHOD',  undef, undef, undef],
     	-command 			=> ['CALLBACK',undef,undef,undef],
-	);
+    	-validatecommand	=> ['PASSIVE', 'validatecommand', 'ValidateCommand', sub {0}],
+	);	
+	$this->ConfigSpecs(%defaults);
 
-	# configure -variable and -command now so that when -options
-	# is set by main-line configure they are there to be set/called.
-	$this->configure(-variable => $var) if ($var = delete $args->{-variable});
-	$this->configure(-command  => $var) if ($var = delete $args->{-command});
+	# configure those opts needed by a create-time-configure
+	# @ target-widget-creation here & now
+	%all_presets = (%defaults, %$args);
+ 	foreach (keys %all_presets) {
+		$value = defined $args->{$_} ? $args->{$_} : $defaults{$_}[-1];
+		next if /-options/;
+		$this->configure($_ => $value);
+	}
+	#print "\n\n";
 }
+#---------------------------------------------
 sub popup
 {
 	my $this = shift;
 	my $menu = $this->menu;
 	my $xpos = $this->rootx;
 	my $ypos = $this->rooty;
+
 	$menu->post($xpos, $ypos);
 }
-
+#---------------------------------------------
 sub set_option
 {
-	my ($this, $label, $val) = @_;
-	$val = $label if @_ == 2;
-	my $var = $this->cget(-textvariable);
-	$$var = $label;
-	$var = $this->cget(-variable);
-	$$var = $val if $var;
-	$this->Callback(-command => $val);
-}
+	#print "reached set_option called with >@_< by ", caller, "<\n";
+	# Parameters
+	my ($this, $label, $value, $full_label) = @_;
+	# Locals
+	my ($failed, $validatecommand, $variable, $textvariable, $old_label, $old_value);
+	
+	# Some presettings
+	$value = $label if @_ == 2;
+	$full_label = $label unless $full_label;
 
+	$validatecommand = $this->cget('-validatecommand');
+	$textvariable = $this->cget('-textvariable');
+	$variable = $this->cget('-variable');
+
+	$old_value = $variable ? $$variable : $this->{OldValue};
+	$old_label = $$textvariable;
+	
+	# Perform validate operation, if available
+	do { $failed = &$validatecommand ($this, $value, $label, $full_label, $old_value, $old_label) } if $validatecommand;
+	
+	# Do the changes
+	unless ($failed) {
+		$$variable = $value if $variable;
+		$this->{OldValue} = $value;
+		$$textvariable = $label;
+
+		# Now invoke the callback
+		$this->Callback(-command => $value, $label, $full_label);
+	}
+}
+#---------------------------------------------
 sub add_options
 {
+	#print "reached add_options with >@_< called by ", caller, "<\n";	
 	# Parameters
 	my $this = shift;
 	
 	# Locals
-	my ($menu, $var, $old, $width, %hash, $first, $i, $subopts, $subopt, $sublabel,
-		$maxrows, $activate, $val, $label, $len, $columnbreak);
+	my ($menu, $var, $old, $width, $activate, $menu_items, $first,
+		$font, $foreground, $background, $activeforeground, $activebackground);
 
-	$menu = $this->menu;
-	$var = $this->cget(-textvariable);
+	$var = $this->cget('-textvariable');
 	$width = $this->cget('-width');
-	$maxrows = $this->cget('-rows');
 	$activate = $this->cget('-activate');
-	$old = $$var; $i = 0;
-	#print "activate is >$activate<\n";
-	
-	#print "menu-background is >" , $menu->cget('-background'), "<\n";
-	#print "main-background is >" , $this->toplevel->cget('-background'), "<\n";
-	$menu->configure(-tearoff => $this->cget('-tearoff') );
-	$menu->configure(-background => $this->toplevel->cget('-background') );
-	while (@_) {
-		$val = shift;
-		$label = $val;
-		if (ref $val) {
-			($label, $val) = @$val;
-		}
-		if (ref $label) {
-			($label, $subopts) = @$label;
-		}
-		else {
-			undef $subopts;
-		}
+	$font = $this->cget('-font');
+	$foreground = $this->cget('-foreground');
+	$background = $this->cget('-background');
+	$activeforeground = $this->cget('-activeforeground');
+	$activebackground = $this->cget('-activebackground');
 
-		$columnbreak = $i ? (($i % $maxrows) ? 0 : 1) : 0;
-		$len = length($label);
-		$width = $len if (!defined($width) || $len > $width);
-		if ($subopts) {
-			my $submenu = $menu->cascade(
-					-label => $label,
-					-tearoff => '0',
-			);
-			foreach $subopt (@$subopts) {
-				$sublabel = $label . '/' . $subopt->[0];
-				$submenu->command(
-						-label => $subopt->[0],
-						-command => [ $this , 'set_option', $sublabel, $subopt->[1] ],
-				);
-				$hash{$sublabel} = $subopt->[1];
-			}
-		}
-		else {
-			$menu->command(
-					-label => $label,
-					-command => [ $this , 'set_option', $label, $val ],
-					-columnbreak => $columnbreak,
-			);
-		}
-		$hash{$label} = $val;
-		$first = $label unless defined $first;
-		$i++;
-	}
-	if (!defined($old) || !exists($hash{$old})) {
-		$this->set_option($first, $hash{$first}) if defined $first and $activate;
+	# Store old selection
+	$old = $$var;
+
+	($menu_items, $width, $first) = $this->generate_menu(undef, @_);
+	push @{$this->{MenuItems}}, @$menu_items;
+
+	$menu = $this->Menu(-menuitems => $this->{MenuItems});
+ 	$menu->configure(-font => $font);
+	$menu->configure(-tearoff => $this->cget('-tearoff') );
+	$menu->configure(-foreground => $this->cget('-foreground') );
+	$menu->configure(-background => $this->cget('-background') );
+	$menu->configure(-activeforeground => $this->cget('-activeforeground') );
+	$menu->configure(-activebackground => $this->cget('-activebackground') );
+	# attach it
+	$this->configure(-menu => $menu);
+	$this->configure(-font => $font);
+	
+	if (!defined($old) || !exists($this->{MenuItemSetupTable}{$old})) {
+		$this->set_option($first, $this->{MenuItemSetupTable}{$first}) if defined $first and $activate;
 	}
 	if ($this->{no_image}) {
 		$this->configure('-width' => $width);
 	}
 }
+#---------------------------------------------
+sub generate_menu
+{
+	# Parameters
+	my ($this, $parent) = (shift, shift);
 
-sub options {
+	# Locals
+	my ($column, $item, $label, $value, $maxrows, @menu_items,
+		$separator, $length, $width, $first,
+		$font, $foreground, $background, $activeforeground, $activebackground);
+	local $_;
+
+	$column = 0;
+	$maxrows = $this->cget('-rows');
+	$separator = $this->cget('-separator');
+	$font = $this->cget('-font');
+	$foreground = $this->cget('-foreground');
+	$background = $this->cget('-background');
+	$activeforeground = $this->cget('-activeforeground');
+	$activebackground = $this->cget('-activebackground');
+	
+	$parent = '' unless $parent;
+	$separator = $this->cget('-separator');
+
+	foreach (@_) {		
+		my $columnbreak = $column ? (($column % $maxrows) ? 0 : 1) : 0; # Closure
+
+		$label = $value = $_;
+		($label, $value) = @$label if ref $label;
+		
+		if (ref $label) {
+			($label, $value) = @$label;
+			my ($menuitems, undef, $first) = $this->generate_menu(($parent ? ($parent . $separator . $label) : $label), @$value);
+			$item = [ 'cascade', $label,
+									-tearoff => '0',
+									-menuitems => $menuitems,
+									-columnbreak => $columnbreak,
+									-font => $font, 
+									-foreground => $foreground,
+									-background => $background,
+									-activeforeground => $activeforeground,
+									-activebackground => $activebackground,
+					];
+			$label = $first;
+		}
+		else {
+			my ($cmd_label, $cmd_value, $full_label); # Closures
+			$cmd_label = $label; $cmd_value = $value;
+			$length = length($label);
+			$width = $length if (!defined($width) or $length > $width);
+			$full_label = ($parent ? ($parent . $separator . $label) : $label);
+			$this->{MenuItemSetupTable}{$full_label} = $value;
+			$item = [ 'command', $cmd_label,
+									-command => sub { $this->set_option($cmd_label, $cmd_value, $full_label) },
+									-columnbreak => $columnbreak,
+									-font => $font,
+									-foreground => $foreground,
+									-background => $background,
+									-activeforeground => $activeforeground,
+									-activebackground => $activebackground,
+					];
+			$label = $full_label;
+		}
+		$first = $label unless $first;
+		$column++;
+		push @menu_items, $item;
+	}
+	return (\@menu_items, $width, $first);
+}
+#---------------------------------------------
+sub options
+{
 	my ($this,$opts) = @_;
 	if (@_ > 1) {
-		$this->menu->delete(0,'end');
+		delete $this->{MenuItemSetupTable};
+		delete $this->{MenuItems};
 		$this->add_options(@$opts);
 	}
 	else {
 		return $this->_cget('-options');
 	}
+}
+#---------------------------------------------
+sub itemtable
+{
+	my $this = shift;
+	my %itemtable = $this->{MenuItemSetupTable} ? %{$this->{MenuItemSetupTable}} : ();
+
+	return wantarray ? %itemtable : \%itemtable;
 }
 
 ########################################################################
@@ -197,7 +287,7 @@ __END__
 
 =head1 NAME
 
-Tk::Optionbox - Another pop-up option-widget (with second-level selections)
+Tk::Optionbox - Another pop-up option-widget (with MULTI-level selections)
 
 =head1 SYNOPSIS
 
@@ -303,6 +393,13 @@ callback gets called.
 'popup()' allows to immediately popup the menu to force the user
 to do some selection.
 
+=item B<itemtable()>
+
+'itemtable()' retrieves a list of all current selection items.
+Requesting a listcontext retrieves a label/value based hash, retrieving
+a scalar retrieves a hash-ref. NOTE the B<-separator> setting for
+the hierarchical delimiter wherever applied.
+
 =back
 
 
@@ -321,8 +418,10 @@ widget too.
 =item B<-command>
 
 '-command' can be used to supply a callback for processing after
-each change of the Checkbox value.
-
+each change of the Option value.
+This callback receives as parameters 'current' value + label + full-label
+for hierarcical (sub)lists. NOTE the B<-separator> setting for
+the hierarchical delimiter applied for full-label.
 
 =item B<-image>
 
@@ -337,12 +436,13 @@ or the current selected optiontext is displayed in the button.
 
 '-options' expects a reference to a list of options.
 
-NOTE: Unless You specify -activate => 0 for the widget each time you use
-add_options the first item will be set to be the current one and any assigned
-callback gets called.
 NOTE: Version 1.4 adds a secondary level to selections: instead of the
-plain format [ label, value ], [ label, value ], [ label, value ],
+plain format label, label, [ label, value ], [ label, value ], [ label, value ],
 you must use this format: [ label, value ], [[keylabel, \@subopts], undef], [ label, value ],
+NOTE: Version 1.6 adds TRUE multi-level selections. The methodology is the same as before:
+Whenever instead of a label an Array-reference is found it is suggested as a subitem-list.
+It is poosible to mix plain items, items with spec'd values other than the label in any level.
+See the supplied example for further information.
 
 =item B<-activate>
 
@@ -352,10 +452,23 @@ set 'current'. see NOTE above.
 =item B<-rows>
 
 '-rows' defines after how many entries the list gets split into another row. default is 25.
+This values applies also for sub-item-lists
+
+=item B<-separator>
+
+'-separator' defines the separator character that is used for the internal representation
+of the tree delimiter. Invoking a callback via set_options the target function get [value,
+label & full-hierarchical label]. The f-h-label uses the specified separator. Default is '.'
 
 =item B<-tearoff>
 
 '-tearoff' defines whether the pop'd up list will have a tear-off entry at first position.
+
+=item B<-validatecommand>
+
+'-validatecommand' defines a Callback function to evaluate the current selection.
+It is invoked with B<the_widget>, B<value>, B<label>, B<full_label>, B<old_value> and B<old_label>.
+Returning B<FALSE> will reject the current selection.
 
 =back
 
@@ -365,11 +478,11 @@ of these widgets.
 
 =head1 AUTHORS
 
-Michael Krause, <KrauseM@gmx.net>
+Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 
-V1.4  (C) June 2005
+V1.6  (C) September 2005
 
 =cut
 

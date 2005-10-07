@@ -9,6 +9,7 @@
 ##            V2.2	12-Nov-2002 	Small Bugfix. MK
 ##            V2.3	30-Sep-2004 	Enhanced state disabled w/o highlightthickness. MK
 ##            V2.4	03-May-2005 	Added variable size option. MK
+##            V2.5	19-Jul-2005 	Bugfix for noInitialCallback option - executed never if set. MK
 ##
 ######################################## EOH ###########################################
 package Tk::Checkbox;
@@ -24,7 +25,7 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '2.4';
+$VERSION = '2.5';
 
 use base qw (Tk::Derived Tk::Frame);
 
@@ -451,7 +452,8 @@ sub set {
 
 		# invoke callback for normal execution
 		my @args = ( $newvalue );
-		$this->Callback(-command => @args) unless defined $this->{m_noInitialCallback};
+		my $inhibit = delete $this->{m_noInitialCallback};
+		$this->Callback(-command => @args) unless $inhibit;
 	}
 }
 
@@ -558,11 +560,11 @@ callback, immediate after a (new) variable has been configured with -variable.
 
 =head1 AUTHORS
 
-Michael Krause, <KrauseM@gmx.net>
+Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 
-V2.4  (C) May 2005
+V2.5  (C) July 2005
 
 =cut
 

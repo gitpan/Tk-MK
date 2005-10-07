@@ -58,6 +58,11 @@ Revision history for Perl extension Tk-MK.
 
 	 o updated the pod docs
 
+0.09 Fri Oct  7 21:36:06 MEST 2005
+
+	 update release
+
+	 o enhanced Tk::Optionbox - added TRUE multilevel hierarchies for the options and validating of selection
 
 ---------------------------------------------------------------
 

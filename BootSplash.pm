@@ -458,7 +458,7 @@ generated with $main->Pixmap( -file => "xxx.xpm") .
 
 =head1 AUTHORS
 
-Michael Krause, <KrauseM@gmx.net>
+Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 

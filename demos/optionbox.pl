@@ -25,17 +25,18 @@ my $opt1 = $mw->Optionbox (
         -options  => [ @options1 ],
         -variable => \$selection1, 
 		-tearoff  => '1',
-		-rows => 10,
 		-activate => '1',
 )->pack(-padx => 50, -pady => 50);;
 
 
 
 my $selection2 =  'fff';
-my @suboptions = ( ['xxx', 1], ['yyy', 3],  ['zzz', 5] , ['vvvv', 6] );
+my @suboptions = ( ['xxx', 1], ['yyy', 3],  ['zzz', 5] , ['vvvv', 6], '@@@' );
+my @suboptions2 = ( ['aa', 11], ['bb', 33],  ['cc', 55] , [['==', \@suboptions], undef], ['dd', 66] );
 
-my @options2 = (['aaa', 1], ['bbb', 1], ['ccc', 1], ['ddd', 1], ['eee', 1], ['fff', 1], ['ggg', 1],
-				['hhh', 1], ['iii', 1], ['jjj', 1], ['qqq', 1], ['www', 8], [['+++', \@suboptions], undef], ['vvvv', 2] );
+my @options2 = (['aaa', 1], '333', ['bbb', 1], ['ccc', 1], ['ddd', 1], ['eee', 1], ['fff', 1], ['ggg', 1],
+				['hhh', 1], ['iii', 1], ['jjj', 1], ['qqq', 1], ['www', 8], [['+++', \@suboptions], undef],
+				['vvvv', 2],[['***', \@suboptions2], undef],'###' );
 my $opt2 = $mw->Optionbox (
         #-text     => "options2",
         -bitmap  => '@' . Tk->findINC('cbxarrow.xbm'),
@@ -45,8 +46,15 @@ my $opt2 = $mw->Optionbox (
 		-tearoff  => '0',
 		-rows => 10,
 		-activate => '0',
+		-separator => '/',
+		-font => 'helvetica 20',
+		#-foreground => 'red',  -bg => 'green',
+		#-activeforeground => 'white',
+		#-activebackground => 'blue',
 )->pack(-padx => 50, -pady => 50);
 
+# try feature of add-on
+$opt2->add_options(@suboptions);
 
 Tk::MainLoop;
 
@@ -59,8 +67,6 @@ sub test2_cb
     print "selection2 called with [@_], \$var = >$selection2<\n";
 }
 
-
 ###
 ### EOF
 ###
-

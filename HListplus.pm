@@ -506,7 +506,7 @@ An alternative Header style, which will be ther default for all columns unless y
 
 =head1 AUTHORS
 
-Michael Krause, <KrauseM@gmx.net>
+Michael Krause, KrauseM_AT_gmx_DOT_net
 
 Thanks for Tk::ResizeButton by B<Shaun Wandler> <wandler@unixmail.compaq.com>,
 Slaven Rezic and Frank Herrmann.

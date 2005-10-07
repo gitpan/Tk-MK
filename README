@@ -1,4 +1,4 @@
-Tk-MK version 0.08
+Tk-MK version 0.09
 ==================
 
 Files in Tk-MK are my personal favorite Tk-add-ons. developed in the
@@ -12,7 +12,7 @@ INCLUDED WIDGETS
 	Tk::DataHList       - extended Tk::HList with data column and ability of sorting, ...  
 	Tk::DataTree        - extended Tk::Tree widget with data column and ability of sorting, ... 
 	Tk::Checkbox        - a nice alternative to the standard check-button widget
-	Tk::Optionbox       - a nice alternative to the default MenuButton (more flexible with graphics-only)
+	Tk::Optionbox       - a nice alternative to the default MenuButton (multi-level selection)
 	Tk::Statusbox       - a view-a-status-by-colors widget with flashing ,...
 	Tk::BootSplash      - an improved Splash screen based on Stephen.O.Lidie's Splashscreen.pm
 	Tk::HdrResizeButton - an reworked alternative HList-Header-Button (based on Tk::ResizeButton) for resizing
@@ -41,7 +41,7 @@ without expressed or implied warranty.  It may be used,
 redistributed and/or modified under the terms of the Perl
 (see Perls Artistic License for details).
 
-Copyright (C) 2002 - 2005 Michael Krause <KrauseM@gmx.net>
+Copyright (C) 2002 - 2005 Michael Krause KrauseM_AT_gmx_DOT_net
 
 
 
@@ -85,5 +85,9 @@ HISTORY:
  Version 0.08 Update release
 
 	o Update the POD docs
+
+ Version 0.09 Update release
+
+	o Update Tk::Optionbox - added TRUE multilevel-selection and validating support
 
 __END__
