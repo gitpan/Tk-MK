@@ -1,16 +1,22 @@
+README
 Changes
 MANIFEST
 Makefile.PL
-README
-Buttonplus.pm
 BootSplash.pm
+Buttonplus.pm
 Checkbox.pm
 DataHList.pm
 DataTree.pm
+HdrResizeButton.pm
 HListplus.pm
 Optionbox.pm
-HdrResizeButton.pm
+ProgressBarPlus.pm
 Statusbox.pm
+demos/buttonplus.pl
+demos/checkbox.pl
+demos/hlistplus.pl
+demos/optionbox.pl
+test.pl
 t/Buttonplus.t
 t/Checkbox.t
 t/DataHList.t
@@ -18,9 +24,6 @@ t/DataTree.t
 t/HListplus.t
 t/Optionbox.t
 t/Statusbox.t
-test.pl
-demos/buttonplus.pl
-demos/checkbox.pl
-demos/hlistplus.pl
-demos/optionbox.pl
+tests/checkbox_tst.pl
+tests/wtest.pl
 META.yml                                 Module meta-data (added by MakeMaker)

@@ -2,7 +2,7 @@
 ######################################## SOH ###########################################
 ## Function : Replacement for Tk:Optionmenu (more flexible handling for 'image_only')
 ##
-## Copyright (c) 2002-2005 Michael Krause. All rights reserved.
+## Copyright (c) 2002-2006 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
 ## under the same terms as Perl itself.
 ######################################## SOH ###########################################
@@ -143,7 +143,7 @@ use Tk::DialogBox;
 			-text => 'dummy', 
 			-command => sub { print "Hello, world!\n" }, 
     );
-	foreach (qw/zzz yyy xxx www vvv uuu ttt/) {
+	foreach (qw/zzz yyy xxx wwwwwwwwww vvv uuu ttt/) {
 		$hlist2->add($_);
 		$hlist2->itemCreate($_, 0, -text => $_);
 		$hlist2->itemCreate($_, 1, -text => $_);

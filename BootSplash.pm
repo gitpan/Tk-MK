@@ -32,7 +32,9 @@ $VERSION = '0.2';
 #
 use Carp;
 # graphical stuff
-use Tk::widgets qw/Label Canvas ProgressBar/;
+#use Tk::widgets qw/Label Canvas ProgressBar/;
+use Tk::widgets qw/Label Canvas/; # Note: We use here the enhanced Progressbar which is NOT yet part of std. Perl-Tk
+use Tk::ProgressBarPlus;
 
 BEGIN {
 	eval {
@@ -222,7 +224,7 @@ sub SetupBootSplash
 					-tags => 'bootphase2',
 	);
 	#------------------------------------------------
-	my $progressbar = $canvas->ProgressBar(
+	my $progressbar = $canvas->ProgressBarPlus(
 					-borderwidth => '2',
 					-relief => 'groove',
 					-from => '0',

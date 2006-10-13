@@ -1,7 +1,7 @@
 ######################################## SOH ###########################################
 ## Function : Replacement for Tk:Optionmenu (more flexible handling for 'image_only')
 ##
-## Copyright (c) 2002-2005 Michael Krause. All rights reserved.
+## Copyright (c) 2002-2006 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
 ## under the same terms as Perl itself.
 ##
@@ -14,6 +14,7 @@
 ##            V1.5  29-Jul-2005 	Added columnbreak for second hierarchy options
 ##            V1.6  14-Sep-2005 	Rewrite: Added TRUE multi-level hierarchy options with color opts. MK
 ##            V1.7  30-Sep-2005 	Added selection-validate operation. MK
+##            V1.8  25-Sep-2006 	Added detection for loops, which might crash the app for linux. MK
 ##
 ######################################## EOH ###########################################
 package Tk::Optionbox;
@@ -26,10 +27,10 @@ use Tk::Menubutton;
 use Tk::Menu;
 
 use strict;
-use Carp;
+use Carp qw(:DEFAULT cluck);
 
 use vars qw ($VERSION);
-$VERSION = '1.7';
+$VERSION = '1.8';
 
 use base qw (Tk::Derived Tk::Menubutton);
 
@@ -99,7 +100,6 @@ sub Populate {
 		next if /-options/;
 		$this->configure($_ => $value);
 	}
-	#print "\n\n";
 }
 #---------------------------------------------
 sub popup
@@ -114,7 +114,6 @@ sub popup
 #---------------------------------------------
 sub set_option
 {
-	#print "reached set_option called with >@_< by ", caller, "<\n";
 	# Parameters
 	my ($this, $label, $value, $full_label) = @_;
 	# Locals
@@ -134,20 +133,21 @@ sub set_option
 	# Perform validate operation, if available
 	do { $failed = &$validatecommand ($this, $value, $label, $full_label, $old_value, $old_label) } if $validatecommand;
 	
-	# Do the changes
+	#Do the changes
 	unless ($failed) {
 		$$variable = $value if $variable;
 		$this->{OldValue} = $value;
 		$$textvariable = $label;
 
 		# Now invoke the callback
+		$this->{CallBackActive} = 1;
 		$this->Callback(-command => $value, $label, $full_label);
+		delete $this->{CallBackActive};
 	}
 }
 #---------------------------------------------
 sub add_options
 {
-	#print "reached add_options with >@_< called by ", caller, "<\n";	
 	# Parameters
 	my $this = shift;
 	
@@ -177,6 +177,15 @@ sub add_options
 	$menu->configure(-background => $this->cget('-background') );
 	$menu->configure(-activeforeground => $this->cget('-activeforeground') );
 	$menu->configure(-activebackground => $this->cget('-activebackground') );
+
+	# check for old menu
+	my $old_menu = $this->cget(-menu);
+	if ($old_menu) {
+		#print "found an old menu!\n";
+		$old_menu->delete(0, 'end');
+		$old_menu->destroy;
+	}
+
 	# attach it
 	$this->configure(-menu => $menu);
 	$this->configure(-font => $font);
@@ -262,6 +271,10 @@ sub options
 {
 	my ($this,$opts) = @_;
 	if (@_ > 1) {
+		if ($this->{CallBackActive}) {
+			cluck "\nTk::Optionbox Error: Found an illegal recursion loop: from Callback() to options() which is not allowed!\nAuto-shutting-down now, please let the developer fix this!";
+			kill 9, $$;
+		}
 		delete $this->{MenuItemSetupTable};
 		delete $this->{MenuItems};
 		$this->add_options(@$opts);
@@ -269,6 +282,7 @@ sub options
 	else {
 		return $this->_cget('-options');
 	}
+
 }
 #---------------------------------------------
 sub itemtable
@@ -482,7 +496,7 @@ Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 
-V1.6  (C) September 2005
+V1.8  (C) September 2006
 
 =cut
 

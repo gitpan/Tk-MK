@@ -1,7 +1,7 @@
 ######################################## SOH ###########################################
 ## Function : Additional Tk Class for Listbox-type HList with Data per Item, Sorting
 ##
-## Copyright (c) 2004 Michael Krause. All rights reserved.
+## Copyright (c) 2004 - 2006 Michael Krause. All rights reserved.
 ## Special Thanks to B<Shaun Wandler> <wandler@unixmail.compaq.com>, whose
 ## Tk::HeaderResizeButton V1.3 has been used here.
 ## This program is free software; you can redistribute it and/or modify it
@@ -10,6 +10,7 @@
 ## History  : V0.1	14-Jan-2004 	Class compound from HList, ResizeButton. MK
 ##            V0.2	20-Jan-2004 	Bugfix 'headerCreate' was not catched and %args->@args. MK
 ##            V0.3	14-Jul-2005 	Bugfix 'header Height' was not called correctly for TK 804.xx. MK
+##            V0.4	13-Oct-2006 	Enhancement based on feedback from Rob Seegel. MK
 ######################################## EOH ###########################################
 
 ##############################################
@@ -23,7 +24,7 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '0.3';
+$VERSION = '0.4';
 
 ########################################################################
 package Tk::HeaderResizeButton;
@@ -322,6 +323,15 @@ use Tk::Submethods ( 'header'    => [qw(configure cget create delete exists size
 #---------------------------------------------
 # internal Setup function
 #---------------------------------------------
+sub CreateArgs
+{
+    my ($class, $this, $args) = @_;		
+
+	# New for V0.4 auto-increase the Column-num by 1 to have a more Win32 behavior
+	$args->{-columns}++ if $args->{-columns};
+
+	return $class->SUPER::CreateArgs($this, $args);
+}
 sub Populate
 {
     my ($this, $args) = @_;		
@@ -332,7 +342,6 @@ sub Populate
 
 	#Invoke Superclass fill func
     $this->SUPER::Populate($args);
-
 }
 
 #---------------------------------------------
@@ -359,22 +368,17 @@ sub header
 			$args{background} = delete $hlist_args{headerbackground} if $hlist_args{headerbackground};
 
 			# Create a new Resize Button
-    		my $header = $this->HeaderResizeButton( 
-        		  -column => $column,
-        		  -lastcolumn => $column,
-				  -highlightthickness => 0,
-				  %args,
+			my $header = $this->HeaderResizeButton( 
+					-column => $column,
+					-lastcolumn => ($this->cget(-columns) == $column + 1),
+					-highlightthickness => 0,
+					%args,
     		);
 			$header->bind('all','<Enter>','EnterFocus');
 			
 			# store it for later cget retrieval
 			$this->{m_headerwidget}{$column} = $header;
 			
-			# remove the last column-flag in the row before to allow drawing the bar
-			if ($column > 0) {
-				my $lastcolumn = $this->{m_headerwidget}{$column - 1};
-				$lastcolumn->configure(-lastcolumn => 0);
-			}
 			# Add options for parent class setup
 			$hlist_args{-itemtype} = 'window';
 			$hlist_args{-widget} = $header;
@@ -451,7 +455,7 @@ Tk::HListplus - A HList that supports resizing, open & close of columns
 
 =head1 DESCRIPTION
 
-A HList derived widget that merges the Features of the ResizeButton.
+A HList derived widget that has resizable columns, based on Header-ResizeButtons.
 
 =head1 METHODS
 
@@ -513,7 +517,7 @@ Slaven Rezic and Frank Herrmann.
 
 This code may be distributed under the same conditions as Perl.
 
-V0.3  (C) July 2005
+V0.4  (C) October 2006
 
 =cut
 

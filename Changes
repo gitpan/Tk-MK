@@ -17,6 +17,7 @@ Revision history for Perl extension Tk-MK.
 	    as a more powerful listbox than even 'ExtListbox',
 		featuring a item/data list with images, etc. , ...
 
+
 0.03  Fri Jan 16 11:35:13 MET 2004
 
       new release
@@ -26,11 +27,13 @@ Revision history for Perl extension Tk-MK.
 	  o renamed ExtHList -> DataHList, ExtTree DataTree for
 	    making the names more self-explanatory
 
+
 0.04 Mon Jan 17 21:34:53 MET 2005
 
       new release (local use only)
 
 	  o 1 new module added Tk::Buttonplus - Button with Text AND Image
+
 
 0.05 Mon May 02 22:01:28 MET 2005
 
@@ -38,11 +41,13 @@ Revision history for Perl extension Tk-MK.
 
 	  o enhanced Tk::Checkbox to support user-customizable size
 
+
 0.06 Mon Jun 13 23:52:14 MET 2005
 
       new release (local use only)
 
 	  o enhanced Tk::Optionbox - added second hierarchy for the options
+
 
 0.07 Thu Jul 14 10:15:35 MEST 2005
 
@@ -52,17 +57,29 @@ Revision history for Perl extension Tk-MK.
 
 	 o cleaned install-kit, demo programs
 
+
 0.08 Thu Jul 14 18:53:58 MEST 2005
 
 	 update release
 
 	 o updated the pod docs
 
+
 0.09 Fri Oct  7 21:36:06 MEST 2005
 
 	 update release
 
 	 o enhanced Tk::Optionbox - added TRUE multilevel hierarchies for the options and validating of selection
+
+
+0.10 Fri Oct 13 19:55:25 CEST 2006
+
+	 update release
+
+	o enhanced Tk::Optionbox - added loop invocation detection to avoid segviolations	
+	o enhanced Tk::HListplus - based on feedback from Rob Seegel (Thx a lot!) added 'auto-blank last column'
+	o changed  Tk::BootSplash - Added the ProgressBarPlus Widget to make 'BootSplash' work for users not using a patched Tk 804 ProgressBar
+
 
 ---------------------------------------------------------------
 

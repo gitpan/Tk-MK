@@ -1,8 +1,8 @@
-Tk-MK version 0.09
+Tk-MK version 0.10
 ==================
 
 Files in Tk-MK are my personal favorite Tk-add-ons. developed in the
-past as a side effect of a huge perl project.
+past as a side effect of several huge perl projects.
 
 
 INCLUDED WIDGETS
@@ -15,8 +15,11 @@ INCLUDED WIDGETS
 	Tk::Optionbox       - a nice alternative to the default MenuButton (multi-level selection)
 	Tk::Statusbox       - a view-a-status-by-colors widget with flashing ,...
 	Tk::BootSplash      - an improved Splash screen based on Stephen.O.Lidie's Splashscreen.pm
+implicitely used widgets:
 	Tk::HdrResizeButton - an reworked alternative HList-Header-Button (based on Tk::ResizeButton) for resizing
-
+	Tk::ProgressBarPlus - A clone of the std. Progressbar that supports percentage display (was send to Nick-Ing S.,
+						  but for time reasons he did not manage to put it in the Tk 805.027 release.
+						  Thus as a work-around we have here a renamed clone to avoid namespace conflicts.
 
 
 INSTALLATION
@@ -31,7 +34,7 @@ To install this module type the following:
 
 DEPENDENCIES
 
-This module requires Tk800.x preferable Tk800.024
+This module requires Tk800.x preferable Tk804.027
 
 
 COPYRIGHT AND LICENCE
@@ -41,7 +44,7 @@ without expressed or implied warranty.  It may be used,
 redistributed and/or modified under the terms of the Perl
 (see Perls Artistic License for details).
 
-Copyright (C) 2002 - 2005 Michael Krause KrauseM_AT_gmx_DOT_net
+Copyright (C) 2002 - 2006 Michael Krause KrauseM_AT_gmx_DOT_net
 
 
 
@@ -69,25 +72,40 @@ HISTORY:
 
 	o 1 new module added Tk::Buttonplus - Button with Text AND Image
 
+
  Version 0.05 Update release
 
 	o enhanced Tk::Checkbox to support user-customizable size
 
+
  Version 0.06 Update release
 
 	o enhanced Tk::Optionbox - added second hierarchy for the options
+
 
  Version 0.07 Bugfix release
 
 	o fixed Tk::HListplus - was complaining with Tk 804.xxx
 	o fixed inconsistency in buttonplus-demo
 
+
  Version 0.08 Update release
 
 	o Update the POD docs
 
+
  Version 0.09 Update release
 
 	o Update Tk::Optionbox - added TRUE multilevel-selection and validating support
+
+
+ Version 0.10 Update release
+
+	o Update Tk::Optionbox - added loop invocation detection to avoid segviolations
+	o Update Tk::HListplus - based on feedback from Rob Seegel (Thx a lot!) added 'auto-blank last column'
+	o Update Tk::BootSplash - see note below
+
+	o Added the ProgressBarPlus Widget to make 'BootSplash' work for users not using a patched Tk 804 ProgressBar
+
 
 __END__

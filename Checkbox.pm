@@ -215,7 +215,7 @@ sub state {
 				# Prepare the background
 				$canvas->configure( -background => $this->{m_Normalbackground} );
 				# Restore HLT
-				$canvas->configure(-highlightthickness => $this->{m_Highlightthickness});
+				$canvas->configure(-highlightthickness => ($this->{m_Highlightthickness} || '1'));
 
 				#Prepare the checkmark foreground
 				if ($var eq $this->{m_OnValue}) {

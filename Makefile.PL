@@ -3,10 +3,10 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Tk::MK',
-	'VERSION' => '0.09',
+	'VERSION' => '0.10',
     'DISTNAME' => 'Tk-MK',
     'PREREQ_PM' => { 'Tk' => '800.024', },
     'dist' => { COMPRESS => 'gzip -9f', SUFFIX => 'gz' },
     'AUTHOR'	=> 'M. Krause',
-    'ABSTRACT'	=> "Several Add-on widgets (Buttonplus, HListplus, DataHList, DataTree, Checkbox, Optionbox, Statusbox, BootSplash & HdrResizeButton)",
+    'ABSTRACT'	=> "Several Add-on widgets (Buttonplus, HListplus, DataHList, DataTree, Checkbox, Optionbox, Statusbox, BootSplash, ProgressBarPlus & HdrResizeButton)",
 );
