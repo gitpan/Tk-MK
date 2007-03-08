@@ -357,8 +357,10 @@ sub Destroyed
  untie $$var if (defined($var) && ref($var))
 }
 
+########################################################################
 1;
 __END__
+
 
 =head1 NAME
 

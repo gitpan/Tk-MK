@@ -201,7 +201,6 @@ sub flash_widget {
 1;
 __END__
 
-=cut
 
 =head1 NAME
 

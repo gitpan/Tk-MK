@@ -409,7 +409,6 @@ sub header
 1;
 __END__
 
-=cut
 
 =head1 NAME
 

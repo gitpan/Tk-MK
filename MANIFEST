@@ -2,16 +2,16 @@ README
 Changes
 MANIFEST
 Makefile.PL
-BootSplash.pm
-Buttonplus.pm
-Checkbox.pm
-DataHList.pm
-DataTree.pm
-HdrResizeButton.pm
-HListplus.pm
-Optionbox.pm
-ProgressBarPlus.pm
-Statusbox.pm
+lib/Tk/BootSplash.pm
+lib/Tk/Buttonplus.pm
+lib/Tk/Checkbox.pm
+lib/Tk/DataHList.pm
+lib/Tk/DataTree.pm
+lib/Tk/HdrResizeButton.pm
+lib/Tk/HListplus.pm
+lib/Tk/Optionbox.pm
+lib/Tk/ProgressBarPlus.pm
+lib/Tk/Statusbox.pm
 demos/buttonplus.pl
 demos/checkbox.pl
 demos/hlistplus.pl
@@ -24,6 +24,7 @@ t/DataTree.t
 t/HListplus.t
 t/Optionbox.t
 t/Statusbox.t
+t/pod.t
 tests/checkbox_tst.pl
 tests/wtest.pl
 META.yml                                 Module meta-data (added by MakeMaker)

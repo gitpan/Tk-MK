@@ -1,11 +1,12 @@
 ######################################## SOH ###########################################
 ## Function : Additional Tk Class for a Button with Text and image
 ##
-## Copyright (c) 2004 Michael Krause. All rights reserved.
+## Copyright (c) 2004-2007 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
 ## under the same terms as Perl itself.
 ##
 ## History  : V0.1	22-Jul-2004 	Class released. MK
+## History  : V0.2	08-Mar-2007 	Added side-default from Optionbase. Thx to hkuhlmann. MK
 ##
 ######################################## EOH ###########################################
 package Tk::Buttonplus;
@@ -21,7 +22,7 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '0.1';
+$VERSION = '0.2';
 
 use base qw (Tk::Frame);
 
@@ -45,7 +46,7 @@ sub Populate
 	my ($side, $image, $button);
 
 	# Retrieve special option
-	$side = delete $args->{-side} || 'right';
+	$side = delete $args->{-side} || $this->optionGet( 'side', 'Side' ) || 'right';
 
 
 	# Walk through the BaseClass
@@ -92,6 +93,7 @@ sub Populate
 		-width			=> [['SELF', 'PASSIVE'], 'width', 'Width', 0],
     	-borderwidth	=> [['SELF', 'PASSIVE'], 'borderwidth', 'BorderWidth', 2],
     	-relief 		=> [['SELF', 'PASSIVE'], 'relief', 'Relief', 'raised'],
+		-side           => [['SELF', 'PASSIVE'], 'side', 'Side', 'right'],
 		-state			=> [['DESCENDANTS'], 'state', 'State', 'normal'],
 		'DEFAULT'		=> [$button],
 	);
@@ -190,7 +192,6 @@ sub butUp
 1;
 __END__
 
-=cut
 
 =head1 NAME
 
@@ -289,7 +290,7 @@ Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 
-V0.1  (C) July 2004
+V0.2  (C) 2004, - 2007
 
 =cut
 

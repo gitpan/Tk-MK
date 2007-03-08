@@ -81,6 +81,14 @@ Revision history for Perl extension Tk-MK.
 	o changed  Tk::BootSplash - Added the ProgressBarPlus Widget to make 'BootSplash' work for users not using a patched Tk 804 ProgressBar
 
 
+0.11 Thu Mar  8 18:56:54 CET 2007
+
+	 update release
+	 
+	o resolved some CPAN issues
+
+	o enhanced Tk::Buttonplus - added side default based on option-database	
+
 ---------------------------------------------------------------
 
 TODO: Still some more work needed on the tests ...

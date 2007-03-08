@@ -1,4 +1,4 @@
-Tk-MK version 0.10
+Tk-MK version 0.11
 ==================
 
 Files in Tk-MK are my personal favorite Tk-add-ons. developed in the
@@ -44,7 +44,7 @@ without expressed or implied warranty.  It may be used,
 redistributed and/or modified under the terms of the Perl
 (see Perls Artistic License for details).
 
-Copyright (C) 2002 - 2006 Michael Krause KrauseM_AT_gmx_DOT_net
+Copyright (C) 2002 - 2007 Michael Krause KrauseM_AT_gmx_DOT_net
 
 
 
@@ -107,5 +107,10 @@ HISTORY:
 
 	o Added the ProgressBarPlus Widget to make 'BootSplash' work for users not using a patched Tk 804 ProgressBar
 
+
+ Version 0.11 Update release
+	 
+	o resolved some CPAN issues
+	o enhanced Tk::Buttonplus - added side default based on option-database	
 
 __END__

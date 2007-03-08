@@ -1,20 +1,23 @@
 ######################################## SOH ###########################################
-## Function : Additional Tk Class for List-type Trees with Data per Item, Sorting
+## Function : Additional Tk Class for Listbox-type HList with Data per Item, Sorting
 ##
-## Copyright (c) 2002-2004 Michael Krause. All rights reserved.
+## Copyright (c) 2002-2005 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
 ## under the same terms as Perl itself.
 ##
-## History  : V1.00	15-Dec-2002 	Class adopted from DataHList. MK
-##            V1.01 19-Jan-2004 	Added numeric sorting for column 2. MK
+## History  : V1.00	10-Dec-2002 	Class adopted from ExtListbox. MK
+##            V1.01 10-Jan-2003 	Added -databackground(color). MK
+##            V1.02 19-Jan-2004 	Added numeric sorting for column 2. MK
+##            V1.1  13-May-2005 	Added missing data for sorting in column 2. MK
 ##
 ######################################## EOH ###########################################
-package Tk::DataTree;
+package Tk::DataHList;
 
 ##############################################
 ### Use
 ##############################################
-use Tk::Tree;
+#use Tk::HList;
+use Tk::HListplus;
 use Tk::ItemStyle;
 use Tk qw(Ev);
 
@@ -22,12 +25,13 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '1.01';
+$VERSION = '1.1';
 
-use base qw (Tk::Derived Tk::Tree);
+#use base qw (Tk::Derived Tk::HList);
+use base qw (Tk::Derived Tk::HListplus);
 
 ########################################################################
-Construct Tk::Widget 'DataTree';
+Construct Tk::Widget 'DataHList';
 
 #---------------------------------------------
 # internal Setup function
@@ -120,7 +124,6 @@ sub add
 	# Prepare the data and it's style
 	$data		= (defined $args{-data}) ? delete $args{-data} : 'undef';
 	$datastyle	= (defined $args{-datastyle}) ? delete $args{-datastyle} : $this->{m_datastyle};
-	
 
 	# now add it as desired
 	$this->SUPER::add($path, -data => $data);
@@ -134,7 +137,6 @@ sub add
 	# store it internally
 	$this->{m_firstpath} = $path unless defined $this->{m_firstpath};
 	# store it internally
-	$this->{m_style}{$path} = $args{-style};
 	$this->{m_datastyle}{$path} = $datastyle;
 	
 	# Install the 'normal view after we have something on the screen..
@@ -185,10 +187,6 @@ sub reverse
 	while (defined $path && $path ne "") {
 		push @paths, $path;
 		#----------------------------------
-		if ($this->{m_style}{$path}) { # avoid silly error-msgs
-			$this->itemConfigure($path, 0, -style => undef);
-			$this->itemConfigure($path, 1, -style => undef);
-		}
 		@allitems = $this->itemConfigure($path, 0);
 		my %args = ();
 		foreach (@allitems) {
@@ -213,55 +211,18 @@ sub reverse
 	$this->delete('all');
 
 	$this->{m_firstpath} = undef;
-
-	my @rpaths = reverse @paths;
-	my @revpaths = $this->reorder_hierarchy(@rpaths);
-
-
+		
 	# Reverse, refill it
-	foreach $path ( @revpaths ) {
-		$this->add( $_, -data => $data{$path},
-					%{$items{$path}}, 
-					-style => $this->{m_style}{$path},
-					-datastyle => $this->{m_datastyle}{$path},
-		);
-		if ($hidden{$path} == 1) {
-			$this->hide('entry', $path);
+	foreach ( reverse @paths ) {
+		$this->add( $_, -data => $data{$_},
+					%{$items{$_}} );
+		if ($hidden{$_} == 1) {
+			$this->hide('entry', $_);
 		}
-		$this->{m_firstpath} = $path unless defined $this->{m_firstpath};  	  
+		$this->{m_firstpath} = $_ unless defined $this->{m_firstpath};
 	}
-	$this->autosetmode();
 }
-sub reorder_hierarchy
-{
-	# Parameters
-	my $this = shift;
 
-	# Parameters
-	my @paths_in = @_;
-	
-	# Locals
-	my (@paths_out, $sepcnt, $found, $max, $sepchar, $cnt);
-	
-	# Initialization
-	$sepcnt = 1;
-	$found = 0;
-	$max = scalar @paths_in;
-	$sepchar = $this->cget(-separator);
-	#Loop
-	while (scalar @paths_in != $found) {
-		foreach (@paths_in) {
-			my @dummy = split(/$sepchar/, $_);
-			$cnt = @dummy;
-			if ($cnt == $sepcnt) {
-				push @paths_out, $_ ;
-				$found++;
-			}
-		}
-		$sepcnt++;
-	}
-	return @paths_out;
-}
 #---------------------------------------------
 # ADD-ON: sorting function
 #---------------------------------------------
@@ -284,10 +245,6 @@ sub sort
 	while (defined $path && $path ne "") {
 		push @paths, $path;
 		#----------------------------------
-		if ($this->{m_style}{$path}) { # avoid silly error-msgs
-			$this->itemConfigure($path, 0, -style => undef);
-			$this->itemConfigure($path, 1, -style => undef);
-		}
 		@allitems = $this->itemConfigure($path, 0);
 		my %args = ();
 		foreach (@allitems) {
@@ -315,7 +272,7 @@ sub sort
 	$this->delete('all');
 	
 	foreach (@paths) {
-		push @sortarray, [ $_, $items{$_}->{-text}, $data{$_}];
+		push @sortarray, [ $_, $items{$_}->{-text}, $data{$_} ];
 	}
 
 	# sort it
@@ -358,31 +315,20 @@ sub sort
 	else {
 		return;
 	}
-
+	
 	#
 	$this->{m_firstpath} = undef;	
-
-	# Retrieve the sorted path-array
-	my @rpaths;
-	foreach ( @tmparray ) {
-		push @rpaths, $_->[0];
-	}
-	my @reordered_paths = $this->reorder_hierarchy(@rpaths);
 	
 	# refill it
-	foreach ( @reordered_paths ) {
-		$path = $_;
+	foreach ( @tmparray ) {
+		$path = $_->[0];
 		$this->add( $path, -data => $data{$path},
-					%{$items{$path}}, 
-					-style => $this->{m_style}{$path},
-					-datastyle => $this->{m_datastyle}{$path},
-		);
+					%{$items{$path}}, -datastyle => $this->{m_datastyle}{$path} );
 		if ($hidden{$path} == 1) {
 			$this->hide('entry', $path);
 		}
 		$this->{m_firstpath} = $path unless defined $this->{m_firstpath};
 	}
-	$this->autosetmode();
 }
 sub secondary
 {
@@ -630,22 +576,21 @@ sub _getcurselection
 1;
 __END__
 
-=cut
 
 =head1 NAME
 
-Tk::DataTree - A Tree widget with a visible/hidden data column
+Tk::DataHList - A HList widget with a visible/hidden data column
 
 =head1 SYNOPSIS
 
     use Tk;
-    use Tk::DataTree
+    use Tk::DataHList
 
     my $mw = MainWindow->new();
 
 
-    #my $tree = $mw->DataTree(
-    my $tree = $mw->Scrolled('DataTree', 
+    #my $listbox = $mw->DataHList(
+    my $listbox = $mw->Scrolled('DataHList', 
         -scrollbars          => 'e',
         -cursor              => 'right_ptr',
         -relief              => 'sunken',
@@ -661,9 +606,8 @@ Tk::DataTree - A Tree widget with a visible/hidden data column
 		-databackground      => 'skyblue',
         -numeric_primary_sort   => '0',
         -numeric_secondary_sort => '1',
-   )->pack;
+    )->pack;
 
-    $tree->autosetmode();
 	
     Tk::MainLoop;
 	
@@ -671,7 +615,7 @@ Tk::DataTree - A Tree widget with a visible/hidden data column
     {
         # 1) insert a complete array with texts and data, keys become 'visible' entry,
         # values are stored as data and are shown in transient column.
-        $tree->add($key, -data => 'i02',
+        $listbox->add($key, -data => 'i02',
 					-itemtype => 'imagetext',
 					-text => 'Dummy',
 					-image => $xpms{dummy},
@@ -685,11 +629,11 @@ Tk::DataTree - A Tree widget with a visible/hidden data column
 
 =head1 DESCRIPTION
 
-A Tree derived widget that offers several add-on functions like in-place-editing,
+A HList derived widget that offers several add-on functions like in-place-editing,
 sorting, reordering and inserting/retrieving of item text & data, 
 suitable for perl Tk800.x (developed with Tk800.024).
 
-You can insert item-texts or item-text/-value pair/s into the DataTree widget with
+You can insert item-texts or item-text/-value pair/s into the DataHList widget with
 the standard-like  B<add()> method .
 The B<delete> removes visible list-items as well as the associated data.
 
@@ -728,7 +672,7 @@ visible and 'B<Control-Key-]>' hides it.
 =item B<add()>
 
 'add($path, <options> )' inserts item text & data
-in the list. Inserting without '-data' just uses the Tree the with a 
+in the list. Inserting without '-data' just uses the HList the with a 
 default 'undef'-data per item.
 
 
@@ -811,7 +755,7 @@ Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 
-V1.01  (C) January 2004
+V1.1  (C) May 2005
 
 =cut
 
