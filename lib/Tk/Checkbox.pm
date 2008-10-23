@@ -1,7 +1,7 @@
 ######################################## SOH ###########################################
 ## Function : Additional Tk Class for a nicer Checkbutton
 ##
-## Copyright (c) 2002-2005 Michael Krause. All rights reserved.
+## Copyright (c) 2002-2007 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
 ## under the same terms as Perl itself.
 ##
@@ -10,6 +10,8 @@
 ##            V2.3	30-Sep-2004 	Enhanced state disabled w/o highlightthickness. MK
 ##            V2.4	03-May-2005 	Added variable size option. MK
 ##            V2.5	19-Jul-2005 	Bugfix for noInitialCallback option - executed never if set. MK
+##            V2.6	03-Apr-2007 	Added activeForeground option. MK
+##            V2.7	14-Feb-2008 	Added -variable retrieval. MK
 ##
 ######################################## EOH ###########################################
 package Tk::Checkbox;
@@ -25,7 +27,7 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '2.5';
+$VERSION = '2.7';
 
 use base qw (Tk::Derived Tk::Frame);
 
@@ -105,7 +107,8 @@ sub Populate {
 	$this->ConfigSpecs(
     	-background				=> ['METHOD', 'background', 'Background', 'grey'],
     	-foreground				=> ['METHOD', 'foreground', 'Foreground', 'black'],
-    	-activebackground		=> [['SELF', 'DESCENDANTS', 'PASSIVE'], 'activebackground', 'ActiveBackground', '#ececec'],
+    	-activebackground		=> [['SELF', 'DESCENDANTS', 'PASSIVE'], 'activeBackground', 'ActiveBackground', '#ececec'],
+    	-activeforeground		=> [['SELF', 'DESCENDANTS', 'PASSIVE'], 'activeForeground', 'ActiveForeground', 'Black'],
     	-disabledforeground 	=> [['SELF', 'DESCENDANTS', 'PASSIVE'], 'disabledForeground', 'DisabledForeground', '#a3a3a3'],
     	-disabledbackground 	=> [['SELF', 'DESCENDANTS', 'PASSIVE'], 'disabledBackground', 'DisabledBackground', '#AE00B200C300'],
     	-borderwidth			=> [['SELF', 'PASSIVE'], 'borderwidth', 'BorderWidth', 2],
@@ -115,6 +118,8 @@ sub Populate {
 	   	-state					=> ['METHOD', 'state', 'State', 'normal'],
     	-command 				=> ['CALLBACK',undef,undef, undef],
     	-variable 				=> ['METHOD', 'variable', 'Variable', undef],
+		-takefocus				=> [$canvas , 'takeFocus','TakeFocus',1],
+		-highlightthickness 	=> [['SELF'], 'highlightThickness','HighlightThickness', 1]
 	);
 
 	# Preset the internal Savers
@@ -318,18 +323,28 @@ sub enter {
 	my $this = shift;
 
 	if ($this->viewable) {
-		my ($canvas, $color);
+		my ($canvas, $color, $fgcolor);
 		$canvas = $this->Subwidget('canvas');
 		#
 		if ($this->{m_State} ne 'disabled') {
 			$this->{m_Entered} = 'true';
 			$this->{m_Lastbackground} = $canvas->cget ('-background');
 			$color = $this->cget ('-activebackground');
+			$fgcolor = $this->cget ('-activeforeground');
 			# Prepare the background			
 			$canvas->configure( -background => $color );
 			
 			#Prepare the checkmark foreground
-			if ($this->{watch}->Fetch ne $this->{m_OnValue}) {
+			if ($this->{watch}->Fetch eq $this->{m_OnValue}) {
+				$canvas->itemconfigure(
+						$this->{m_CheckMark},
+						#-outline => $color,
+						#-fill => $color,
+						-outline => $fgcolor,
+						-fill => $fgcolor,
+				);
+			}
+			else {
 				$canvas->itemconfigure(
 						$this->{m_CheckMark},
 						-outline => $color,
@@ -379,19 +394,24 @@ sub variable {
 	# Parameters
     my ($this, $vref) = @_;
 	#
-    my $st = [sub {  my ($watch, $new_val) = @_;
-					 my $argv= $watch->Args('-store');
-					 $argv->[0]->set($new_val);
-					 $watch->Store($new_val);
-				  }, $this];
+	if ($vref) {
+    	my $st = [sub {  my ($watch, $new_val) = @_;
+						 my $argv= $watch->Args('-store');
+						 $argv->[0]->set($new_val);
+						 $watch->Store($new_val);
+					  }, $this];
 
-    $this->{watch} = Tie::Watch->new(-variable => $vref, -store => $st);
-	
-	# Remove the Watchpoint after it's no more needed
-	$this->OnDestroy( sub { $this->{watch}->Unwatch if $this->{watch} } );
+    	$this->{watch} = Tie::Watch->new(-variable => $vref, -store => $st);
 
-	# Preset will the current var-value
-	$this->set($$vref);
+		# Remove the Watchpoint after it's no more needed
+		$this->OnDestroy( sub { $this->{watch}->Unwatch if $this->{watch} } );
+
+		# Preset will the current var-value
+		$this->set($$vref);
+		# Store internally
+		$this->{m_VarRef} = $vref;
+	}
+	return $this->{m_VarRef};
 } # end variable
 
 
@@ -563,7 +583,7 @@ Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 
-V2.5  (C) July 2005
+V2.6  (C) April 2007
 
 =cut
 

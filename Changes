@@ -24,7 +24,7 @@ Revision history for Perl extension Tk-MK.
 	  
 	  o added the HListplus class (HList with column resizing)
 
-	  o renamed ExtHList -> DataHList, ExtTree DataTree for
+	  o renamed ExtHList -> DHList, ExtTree DTree for
 	    making the names more self-explanatory
 
 
@@ -88,6 +88,26 @@ Revision history for Perl extension Tk-MK.
 	o resolved some CPAN issues
 
 	o enhanced Tk::Buttonplus - added side default based on option-database	
+
+
+0.12 Tue Oct 14 13:29:07 CEST 2008
+
+	 update release
+
+	o enhanced Tk::Optionbox - added quick-popup for non-changed options
+
+	o 1 new module added Tk::PopUpSelectBox - A scrolled pop-up selection-widget (with MULTI-level selections)
+		useful where a Tk::Optionbox would have too many entries
+
+0.13 Thu Oct 23 17:48:07 CEST 2008
+
+	 update release
+
+	o Renamed DataHList and DataTree to DHList and DHTree to avoid name-space conflicts in CPAN
+
+	o Bugfix for Tk::DHList - Deleting the FIRST entry in a DHList messed up the reverse function.
+
+
 
 ---------------------------------------------------------------
 

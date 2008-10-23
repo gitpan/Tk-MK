@@ -5,13 +5,14 @@ Makefile.PL
 lib/Tk/BootSplash.pm
 lib/Tk/Buttonplus.pm
 lib/Tk/Checkbox.pm
-lib/Tk/DataHList.pm
-lib/Tk/DataTree.pm
+lib/Tk/DHList.pm
+lib/Tk/DTree.pm
 lib/Tk/HdrResizeButton.pm
 lib/Tk/HListplus.pm
 lib/Tk/Optionbox.pm
 lib/Tk/ProgressBarPlus.pm
 lib/Tk/Statusbox.pm
+lib/Tk/PopUpSelectBox.pm
 demos/buttonplus.pl
 demos/checkbox.pl
 demos/hlistplus.pl
@@ -19,8 +20,8 @@ demos/optionbox.pl
 test.pl
 t/Buttonplus.t
 t/Checkbox.t
-t/DataHList.t
-t/DataTree.t
+t/DHList.t
+t/DTree.t
 t/HListplus.t
 t/Optionbox.t
 t/Statusbox.t

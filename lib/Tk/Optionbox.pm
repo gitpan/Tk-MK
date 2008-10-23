@@ -22,6 +22,7 @@ package Tk::Optionbox;
 ##############################################
 ### Use
 ##############################################
+use Storable qw(freeze);
 use Tk;
 use Tk::Menubutton;
 use Tk::Menu;
@@ -100,6 +101,9 @@ sub Populate {
 		next if /-options/;
 		$this->configure($_ => $value);
 	}
+	
+	# initialize internals
+	$this->{MenuItems} = [];
 }
 #---------------------------------------------
 sub popup
@@ -146,14 +150,23 @@ sub set_option
 	}
 }
 #---------------------------------------------
+my $FingerPrint;
 sub add_options
 {
 	# Parameters
-	my $this = shift;
+	my ($this, @args) = @_;
 	
 	# Locals
-	my ($menu, $var, $old, $width, $activate, $menu_items, $first,
+	my ($test, $menu, $var, $old, $width, $activate, $menu_items, $first,
 		$font, $foreground, $background, $activeforeground, $activebackground);
+
+	#-----------------------------------------------------------------------------
+	$this->{MenuItems} = [] unless $this->{MenuItems};
+	# Check if we already prepared exactly the same tree
+	$test = freeze(\@args);
+	return if $FingerPrint and $FingerPrint eq $test and scalar @{$this->{MenuItems}} > 0;
+	$FingerPrint = $test;
+	#print "building new tree...\n";
 
 	$var = $this->cget('-textvariable');
 	$width = $this->cget('-width');
@@ -167,7 +180,7 @@ sub add_options
 	# Store old selection
 	$old = $$var;
 
-	($menu_items, $width, $first) = $this->generate_menu(undef, @_);
+	($menu_items, $width, $first) = $this->generate_menu(undef, (ref $args[0] eq 'ARRAY') ? @{$args[0]} : @args);
 	push @{$this->{MenuItems}}, @$menu_items;
 
 	$menu = $this->Menu(-menuitems => $this->{MenuItems});
@@ -269,7 +282,7 @@ sub generate_menu
 #---------------------------------------------
 sub options
 {
-	my ($this,$opts) = @_;
+	my ($this, $opts) = @_;
 	if (@_ > 1) {
 		if ($this->{CallBackActive}) {
 			cluck "\nTk::Optionbox Error: Found an illegal recursion loop: from Callback() to options() which is not allowed!\nAuto-shutting-down now, please let the developer fix this!";
@@ -277,7 +290,7 @@ sub options
 		}
 		delete $this->{MenuItemSetupTable};
 		delete $this->{MenuItems};
-		$this->add_options(@$opts);
+		$this->add_options($opts);
 	}
 	else {
 		return $this->_cget('-options');

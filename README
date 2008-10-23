@@ -1,4 +1,4 @@
-Tk-MK version 0.11
+Tk-MK version 0.13
 ==================
 
 Files in Tk-MK are my personal favorite Tk-add-ons. developed in the
@@ -9,10 +9,11 @@ INCLUDED WIDGETS
 
 	Tk::Buttonplus      - extended Tk::Button with ability to show a bitmap/image AND a text label
 	Tk::HListplus       - extended Tk::HList with movable columns based on ResizeButton.pm
-	Tk::DataHList       - extended Tk::HList with data column and ability of sorting, ...  
-	Tk::DataTree        - extended Tk::Tree widget with data column and ability of sorting, ... 
+	Tk::DHList       - extended Tk::HList with data column and ability of sorting, ...  
+	Tk::DTree        - extended Tk::Tree widget with data column and ability of sorting, ... 
 	Tk::Checkbox        - a nice alternative to the standard check-button widget
 	Tk::Optionbox       - a nice alternative to the default MenuButton (multi-level selection)
+	Tk::PopUpSelectBox  - a dialog based selectionlist alternative to Tk::Optionbox (multi-level selection)
 	Tk::Statusbox       - a view-a-status-by-colors widget with flashing ,...
 	Tk::BootSplash      - an improved Splash screen based on Stephen.O.Lidie's Splashscreen.pm
 implicitely used widgets:
@@ -44,7 +45,7 @@ without expressed or implied warranty.  It may be used,
 redistributed and/or modified under the terms of the Perl
 (see Perls Artistic License for details).
 
-Copyright (C) 2002 - 2007 Michael Krause KrauseM_AT_gmx_DOT_net
+Copyright (C) 2002 - 2008 Michael Krause KrauseM_AT_gmx_DOT_net
 
 
 
@@ -61,7 +62,7 @@ HISTORY:
 
  Version 0.03 Update release
 
-	o renamed Tk::ExtTree -> Tk::DataTree, Tk::ExtHList -> Tk::DataHList
+	o renamed Tk::ExtTree -> Tk::DTree, Tk::ExtHList -> Tk::DHList
 	  for making the names more intuitive
 	  
 	o added 2 new modules added Tk::HListplus, Tk::BootSplash,
@@ -112,5 +113,17 @@ HISTORY:
 	 
 	o resolved some CPAN issues
 	o enhanced Tk::Buttonplus - added side default based on option-database	
+
+ Version 0.12 Update release
+	 
+	o enhanced Tk::Optionbox - added quick-popup for non-changed options
+	o 1 new module added Tk::PopUpSelectBox - A scrolled pop-up selection-widget (with MULTI-level selections)
+		useful where a Tk::Optionbox would have too many entries
+
+ Version 0.13 Update release
+	 
+	o Renamed DataHList and DataTree to DHList and DHTree to avoid name-space conflicts in CPAN
+	o Bugfix for Tk::DHList - Deleting the FIRST entry in a DHList messed up the reverse function.
+
 
 __END__
