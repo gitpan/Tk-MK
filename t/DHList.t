@@ -17,7 +17,7 @@ ok($@, "", "can't create MainWindow");
 ok(Tk::Exists($mw), 1, "MainWindow creation failed");
 
 #--------------------------------------------------------------
-my $class = 'DataHList';
+my $class = 'DHList';
 my $foo = 'i01';
 my $bar = 'DummyProject';
 my $result;

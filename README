@@ -126,4 +126,8 @@ HISTORY:
 	o Bugfix for Tk::DHList - Deleting the FIRST entry in a DHList messed up the reverse function.
 
 
+0.14 Fri Oct 24 13:50:23 CEST 2008
+	 
+	o resolved some CPAN checker issues
+
 __END__

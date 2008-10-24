@@ -1,5 +1,5 @@
 ######################################## SOH ###########################################
-## Function : Wrapper for the Tk::Splashscreen based Boot-Splash procedures
+## Function : Wrapper for the Tk::SplashScreenZ based Boot-Splash procedures
 ##
 ## Copyright (c) 2003 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
@@ -38,21 +38,21 @@ use Tk::ProgressBarPlus;
 
 BEGIN {
 	eval {
-		require Tk::Splashscreen;
-		import Tk::Splashscreen;
+		require Tk::SplashScreenZ;
+		import Tk::SplashScreenZ;
 	};
-	if ($@) { # ups, no Tk::Splashscreen, use this one here
+	if ($@) { # ups, no Tk::SplashScreenZ, use this one here
 		########################################################################
-		package Tk::Splashscreen;
+		package Tk::SplashScreenZ;
 		########################################################################
-		$Tk::Splashscreen::VERSION = '1.0';
+		$Tk::SplashScreenZ::VERSION = '1.0';
 		use Tk qw/Ev/;
 		use Tk qw/:eventtypes/;
 		use Tk::waitVariableX;
 		use Tk::widgets qw/Toplevel/;
 		use base qw/Tk::Toplevel/;
 
-		Construct Tk::Widget 'Splashscreen';
+		Construct Tk::Widget 'SplashScreenZ';
 
 		sub Populate {
     		my ($self, $args) = @_;
@@ -164,7 +164,7 @@ sub SetupBootSplash
 	croak "No Image for Bootsplash defined!\n" unless $args{-image};
 	$parent = delete $args{-parent}; croak "No Parent Window for Bootsplash defined!\n" unless $parent;
 	
-	$window = $parent->Splashscreen(
+	$window = $parent->SplashScreenZ(
 			-milliseconds => $args{-totaltime} || 5000,
 	);
 	$canvas = $window->Canvas(
@@ -338,7 +338,7 @@ __END__
 
 =head1 NAME
 
-Tk::BootSplash - wrapper for the common Tk::Splashscreen
+Tk::BootSplash - wrapper for the common Tk::SplashScreen
 
 =head1 SYNOPSIS
 
@@ -363,9 +363,9 @@ Tk::BootSplash - wrapper for the common Tk::Splashscreen
 
 =head1 DESCRIPTION
 
-This module is a fully customizable wrapper for the common Tk:Splashscreen, which can
+This module is a fully customizable wrapper for the common Tk:SplashScreen, which can
 be used to ease handling of a standardized boot splash screen with picture,
-texts and a progress bar. (see I<Tk::Splashscreen> for details).
+texts and a progress bar. (see I<Tk::SplashScreen> for details).
 
 NOTE: This module is less a gimmick than a feature, since we
 need to wait some time until all the Windows and/or Widgets
@@ -435,11 +435,11 @@ generated with $main->Pixmap( -file => "xxx.xpm") .
 
 =item B<-width>
 
-'-width' current width of the Splashscreen, should match to used image-size.
+'-width' current width of the SplashScreen, should match to used image-size.
 
 =item B<-height>
 
-'-height' current height of the Splashscreen, should match to used image-size.
+'-height' current height of the SplashScreen, should match to used image-size.
 
 =item B<-x1>, B<-y1>
 
