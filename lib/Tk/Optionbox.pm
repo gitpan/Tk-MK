@@ -1,7 +1,7 @@
 ######################################## SOH ###########################################
 ## Function : Replacement for Tk:Optionmenu (more flexible handling for 'image_only')
 ##
-## Copyright (c) 2002-2006 Michael Krause. All rights reserved.
+## Copyright (c) 2002-2009 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
 ## under the same terms as Perl itself.
 ##
@@ -15,6 +15,7 @@
 ##            V1.6  14-Sep-2005 	Rewrite: Added TRUE multi-level hierarchy options with color opts. MK
 ##            V1.7  30-Sep-2005 	Added selection-validate operation. MK
 ##            V1.8  25-Sep-2006 	Added detection for loops, which might crash the app for linux. MK
+##            V1.9  11-Mar-2009 	Added -popover 'cursor for popup() func. MK
 ##
 ######################################## EOH ###########################################
 package Tk::Optionbox;
@@ -31,7 +32,7 @@ use strict;
 use Carp qw(:DEFAULT cluck);
 
 use vars qw ($VERSION);
-$VERSION = '1.8';
+$VERSION = '1.9';
 
 use base qw (Tk::Derived Tk::Menubutton);
 
@@ -108,11 +109,22 @@ sub Populate {
 #---------------------------------------------
 sub popup
 {
-	my $this = shift;
-	my $menu = $this->menu;
-	my $xpos = $this->rootx;
-	my $ypos = $this->rooty;
+	# Parameters
+	my ($this, %args) = @_;
+	# Locals
+	my ($menu, $xpos, $ypos);
 
+	$menu = $this->menu;
+	
+	if ($args{-popover} and $args{-popover} eq 'cursor') {
+	   my $e = $Tk::event;
+		$xpos = $e->X;
+		$ypos = $e->Y;
+	}
+	else {
+		$xpos = $this->rootx;
+		$ypos = $this->rooty;
+	}
 	$menu->post($xpos, $ypos);
 }
 #---------------------------------------------
@@ -418,6 +430,9 @@ callback gets called.
 
 'popup()' allows to immediately popup the menu to force the user
 to do some selection.
+It is possible to specify -popover => 'cursor' as an additional argument.
+Doing this the pop-up selection is shown at the current cursor position instead of
+the default location OVER the anchoring button.
 
 =item B<itemtable()>
 

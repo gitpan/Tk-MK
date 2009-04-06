@@ -17,6 +17,7 @@ demos/buttonplus.pl
 demos/checkbox.pl
 demos/hlistplus.pl
 demos/optionbox.pl
+demos/hdr_resize_button.pl
 test.pl
 t/Buttonplus.t
 t/Checkbox.t

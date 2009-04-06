@@ -112,6 +112,10 @@ Revision history for Perl extension Tk-MK.
 	o resolved some CPAN checker issues
 
 
+0.15 Mon Apr  6 20:19:01 CEST 2009
+	 
+	o resolved issue on ListHeader-Bttn: Double-Click for column resizing should NOT invoke Single-Click-CB
+
 ---------------------------------------------------------------
 
 TODO: Still some more work needed on the tests ...

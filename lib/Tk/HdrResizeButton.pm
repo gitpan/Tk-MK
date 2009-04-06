@@ -49,7 +49,7 @@ sub ClassInit
 	$mw->bind( $class, '<ButtonPress-1>',   'ButtonPress' );
 	$mw->bind( $class, '<Motion>',          'ButtonOver' );
 	$mw->bind( $class, '<ButtonRelease-3>', 'ColumnFullSize' );
-	$mw->bind( $class, '<Double-1>',        'OpenCloseColumn' );
+	$mw->bind( $class, '<Double-1>',        'ButtonDouble1' );
 
 	# Override these ones too
 	$mw->bind($class, '<Enter>', 'BttnEnter' );
@@ -123,7 +123,7 @@ sub BttnEnter
 {
 	my $this = shift;
 	$this->StateSalvation(1);
-	$this->configure(-relief => $this->cget(-buttondownrelief)) if $this->{m_ButtonPress};
+	$this->configure(-relief => $this->cget('-buttondownrelief')) if $this->{m_ButtonPress};
 }
 # CALLED IF WE LEAVE THE TRIM AREA
 sub BttnLeave
@@ -163,7 +163,8 @@ sub TrimLeave
 sub OpenCloseColumn
 {
 	my $this = shift;
-	my $column = $this->cget(-column);
+
+	my $column = $this->cget('-column');
 	if ($this->{m_ColumClosed}{$column}) {
 		$this->{m_ColumClosed}{$column} = 0;
 		if ($this->{m_LastColumWidth}) {
@@ -179,7 +180,7 @@ sub OpenCloseColumn
 		$this->{m_ColumClosed}{$column} = 1;
 		$this->{m_LastColumWidth} = $this->parent->columnWidth($column);
 		$this->parent->columnWidth($column, 10);
-		$this->{m_LastAnchor} = $this->cget(-anchor);
+		$this->{m_LastAnchor} = $this->cget('-anchor');
 		$this->configure(-anchor => 'w');
 	}
 	
@@ -188,7 +189,7 @@ sub OpenCloseColumn
 sub ColumnFullSize
 {
 	my $this = shift;
-	my $column = $this->cget(-column);
+	my $column = $this->cget('-column');
 	if ($this->{m_ColumClosed}{$column}) {
 		delete $this->{m_LastColumWidth}; # This ensure immediate update
 		$this->OpenCloseColumn();
@@ -198,18 +199,19 @@ sub ColumnFullSize
 	}
 }
 
+## Event Handlers
 sub ButtonPress
 {
 	my ($this, $p_Trim) = @_;
-
-	$this->{m_relief} = $this->cget(-relief);
+	$this->{m_LastEvent} = 'ButtonPress';	
+	$this->{m_relief} = $this->cget('-relief');
 	if ($this->ButtonEdgeSelected() || $p_Trim) {
 		$this->{m_EdgeSelected} = 1;
 		$this->{m_X} = $this->pointerx() - $this->rootx();
 		$this->ButtonOver();
 	}
 	else {
-		$this->configure(-relief => $this->cget(-buttondownrelief));
+		$this->configure(-relief => $this->cget('-buttondownrelief'));
 		$this->{m_X} = -1;
 	}
 	$this->{m_ButtonPress} = 1;
@@ -228,20 +230,36 @@ sub ButtonRelease
 		my $l_NewWidth = ( $this->pointerx() - $this->rootx() );
 
 		my $hlist = $this->parent;
-		my $col   = $this->cget( -column );
+		my $col   = $this->cget('-column');
 		# Better resize to minimum than to do nothing
-		$l_NewWidth = $this->cget(-minwidth) if ($l_NewWidth + 5) < $this->cget( -minwidth );
+		$l_NewWidth = $this->cget('-minwidth') if ($l_NewWidth + 5) < $this->cget('-minwidth');
 		$hlist->columnWidth( $col, $l_NewWidth + 5 );
 
 		$this->GeometryRequest( $l_NewWidth, $this->reqheight() );
 	} 
 	elsif ( !$this->ButtonEdgeSelected() ) {
-		# Run only if we're still over the header
-		$this->Callback(-command => $this) if $this->cget(-state) eq 'active';
+		# Run only if we're still over the header and if we're in TRUE Release Mode (No Dbl-Click)
+		if ($this->cget('-state') eq 'active') {
+			$this->after(500, sub { $this->Callback(-command => $this) if $this->{m_LastEvent} eq 'ButtonPress' } );
+		}
 	}
 
 	$this->{m_X} = -1;
 }
+
+
+# CALLED IF WE DOUBLECLICK
+sub ButtonDouble1
+{
+	my $this = shift;
+	
+	# Cancel a scheduled Release-Bttn-1 - attached Event
+	$this->{m_LastEvent} = 'DoubleClick';
+
+	# Execute the double-click default action
+	$this->OpenCloseColumn();
+}
+
 
 # CHECK IF THE RESIZE CONTROL IS SELECTED
 sub ButtonEdgeSelected
@@ -290,7 +308,7 @@ sub MoveColumnBar
 		'-x'      => $x,
 		'-height' => $height - 5,
 		'-y'      => $this->height() + 5,
-	) unless $this->cget(-lastcolumn);
+	) unless $this->cget('-lastcolumn');
 }
 # REMOVES IT FROM DISPLAY without destroying it
 sub HideColumnBar

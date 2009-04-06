@@ -1,4 +1,4 @@
-Tk-MK version 0.13
+Tk-MK version 0.15
 ==================
 
 Files in Tk-MK are my personal favorite Tk-add-ons. developed in the
@@ -9,8 +9,8 @@ INCLUDED WIDGETS
 
 	Tk::Buttonplus      - extended Tk::Button with ability to show a bitmap/image AND a text label
 	Tk::HListplus       - extended Tk::HList with movable columns based on ResizeButton.pm
-	Tk::DHList       - extended Tk::HList with data column and ability of sorting, ...  
-	Tk::DTree        - extended Tk::Tree widget with data column and ability of sorting, ... 
+	Tk::DHList          - extended Tk::HList with data column and ability of sorting, ...  
+	Tk::DTree           - extended Tk::Tree widget with data column and ability of sorting, ... 
 	Tk::Checkbox        - a nice alternative to the standard check-button widget
 	Tk::Optionbox       - a nice alternative to the default MenuButton (multi-level selection)
 	Tk::PopUpSelectBox  - a dialog based selectionlist alternative to Tk::Optionbox (multi-level selection)
@@ -129,5 +129,11 @@ HISTORY:
 0.14 Fri Oct 24 13:50:23 CEST 2008
 	 
 	o resolved some CPAN checker issues
+
+
+0.15 Mon Apr  6 20:19:01 CEST 2009
+	 
+	o resolved issue on ListHeader-Bttn: Double-Click for column resizing should NOT invoke Single-Click-CB
+
 
 __END__
