@@ -1,7 +1,7 @@
 ######################################## SOH ###########################################
 ## Function : Additional Tk Class for Listbox-type HList with Data per Item, Sorting
 ##
-## Copyright (c) 2004 - 2006 Michael Krause. All rights reserved.
+## Copyright (c) 2004 - 2009 Michael Krause. All rights reserved.
 ## Special Thanks to B<Shaun Wandler> <wandler@unixmail.compaq.com>, whose
 ## Tk::HeaderResizeButton V1.3 has been used here.
 ## This program is free software; you can redistribute it and/or modify it
@@ -11,6 +11,7 @@
 ##            V0.2	20-Jan-2004 	Bugfix 'headerCreate' was not catched and %args->@args. MK
 ##            V0.3	14-Jul-2005 	Bugfix 'header Height' was not called correctly for TK 804.xx. MK
 ##            V0.4	13-Oct-2006 	Enhancement based on feedback from Rob Seegel. MK
+##            V0.5	06-Apr-2009 	Enhancement based on feedback from Kai Ludick (DblClick on Header always raised HBttn-Cmd-CB). MK
 ######################################## EOH ###########################################
 
 ##############################################
@@ -24,7 +25,7 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '0.4';
+$VERSION = '0.5';
 
 ########################################################################
 package Tk::HeaderResizeButton;
@@ -53,7 +54,7 @@ sub ClassInit {
 	$window->bind($class, '<ButtonPress-1>',   'ButtonPress');
 	$window->bind($class, '<Motion>',          'ButtonOver');
 	$window->bind($class, '<ButtonRelease-3>', 'ColumnFullSize');
-	$window->bind($class, '<Double-1>',        'OpenCloseColumn');
+	$window->bind($class, '<Double-1>',        'ButtonDouble1');
 	# Override these ones too
 	$window->bind($class, '<Enter>', 'BttnEnter' );
 	$window->bind($class, '<Leave>', 'BttnLeave' );
@@ -125,7 +126,7 @@ sub BttnEnter
 	my $this = shift;
 	#print "BttnEnter\n";
 	$this->StateSalvation(1);
-	$this->configure(-relief => $this->cget(-buttondownrelief)) if $this->{m_ButtonPress};
+	$this->configure(-relief => $this->cget('-buttondownrelief')) if $this->{m_ButtonPress};
 
 }
 # CALLED IF WE LEAVE THE HEADER AREA
@@ -161,8 +162,8 @@ sub TrimLeave
 sub OpenCloseColumn
 {
 	my $this = shift;
-	print "reached OpenCloseColumn\n";
-	my $column = $this->cget(-column);
+
+	my $column = $this->cget('-column');
 	if ($this->{m_ColumClosed}{$column}) {
 		$this->{m_ColumClosed}{$column} = 0;
 		if ($this->{m_LastColumWidth}) {
@@ -178,10 +179,10 @@ sub OpenCloseColumn
 		$this->{m_ColumClosed}{$column} = 1;
 		$this->{m_LastColumWidth} = $this->parent->columnWidth($column);
 		$this->parent->columnWidth($column, 10);
-		$this->{m_LastAnchor} = $this->cget(-anchor);
+		$this->{m_LastAnchor} = $this->cget('-anchor');
 		$this->configure(-anchor => 'w');
 	}
-
+	
 }
 # CALLED TO RESIZE A COLUMN TO THE NEEDED EXTENT
 sub ColumnFullSize
@@ -197,23 +198,26 @@ sub ColumnFullSize
 	}
 }
 
-sub ButtonPress {
+## Event Handlers
+sub ButtonPress
+{
 	my ($this, $p_Trim) = @_;
-
-	$this->{m_relief} = $this->cget(-relief);
+	$this->{m_LastEvent} = 'ButtonPress';	
+	$this->{m_relief} = $this->cget('-relief');
 	if ($this->ButtonEdgeSelected() || $p_Trim) {
 		$this->{m_EdgeSelected} = 1;
 		$this->{m_X} = $this->pointerx() - $this->rootx();
 		$this->ButtonOver();
 	}
 	else {
-		$this->configure(-relief => $this->cget(-buttondownrelief));
+		$this->configure(-relief => $this->cget('-buttondownrelief'));
 		$this->{m_X} = -1;
 	}
 	$this->{m_ButtonPress} = 1;
 }
 
-sub ButtonRelease {
+sub ButtonRelease
+{
 	my ( $this, $p_Trim ) = @_;
 
 	delete $this->{m_ButtonPress};
@@ -235,21 +239,37 @@ sub ButtonRelease {
 		$this->GeometryRequest( $l_NewWidth, $this->reqheight() );
 	}
 	elsif ( !$this->ButtonEdgeSelected() ) {
-		# Run only if we're still over the header
-		$this->Callback(-command => $this) if $this->cget(-state) eq 'active';
+		# Run only if we're still over the header and if we're in TRUE Release Mode (No Dbl-Click)
+		if ($this->cget('-state') eq 'active') {
+			$this->after(500, sub { $this->Callback(-command => $this) if $this->{m_LastEvent} eq 'ButtonPress' } );
+		}
 	}
 
 	$this->{m_X} = -1;
 }
 
+# CALLED IF WE DOUBLECLICK
+sub ButtonDouble1
+{
+	my $this = shift;
+	
+	# Cancel a scheduled Release-Bttn-1 - attached Event
+	$this->{m_LastEvent} = 'DoubleClick';
+
+	# Execute the double-click default action
+	$this->OpenCloseColumn();
+}
+
 # CHECK IF THE RESIZE CONTROL IS SELECTED
-sub ButtonEdgeSelected {
+sub ButtonEdgeSelected
+{
 	my $this = shift;
 	return ( $this->pointerx() - $this->{m_LastTrim}->rootx() ) > -1;
 }
 
 # CHANGE THE CURSOR OVER THE RESIZE CONTROL
-sub ButtonOver {
+sub ButtonOver
+{
 	my ($this, $p_Trim) = @_;
 	if ( $this->{'m_EdgeSelected'} || $this->ButtonEdgeSelected() || $p_Trim ) {
 		$this->MoveColumnBar() if $this->{columnBar};
@@ -275,7 +295,8 @@ sub StateSalvation
 
 # Move a column bar which displays on top of the HList widget
 # to indicate the eventual size of the column.
-sub MoveColumnBar {
+sub MoveColumnBar
+{
 	my $this = shift;
 
 	my $hlist = $this->parent;
@@ -289,7 +310,8 @@ sub MoveColumnBar {
 	) unless $this->cget(-lastcolumn);
 }
 # REMOVES IT FROM DISPLAY without destroying it
-sub HideColumnBar {
+sub HideColumnBar
+{
 	my $this = shift;
 	$this->{columnBar}->placeForget();
 }

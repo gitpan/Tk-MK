@@ -3,7 +3,7 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     'NAME'	=> 'Tk::MK',
-	'VERSION' => '0.15',
+	'VERSION' => '0.16',
     'DISTNAME' => 'Tk-MK',
     'PREREQ_PM' => { 'Tk' => '804.027', },
     'dist' => { COMPRESS => 'gzip -9f', SUFFIX => 'gz' },

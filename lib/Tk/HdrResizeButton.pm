@@ -2,8 +2,8 @@ package Tk::HdrResizeButton;
 #------------------------------------------------
 # automagically updated versioning variables -- CVS modifies these!
 #------------------------------------------------
-our $Revision    = '$Revision: 1.3 $';
-our $CheckinDate = '$Date: 2003/02/17 16:46:54 $';
+our $Revision    = '$Revision: 1.4 $';
+our $CheckinDate = '$Date: 2009/04/06 20:46:00 $';
 our $CheckinUser = '$Author: xpix $';
 
 # we need to clean these up right here
@@ -35,6 +35,7 @@ $CheckinUser =~ s/^\$\S+:\s*(.*?)\s*\$$/$1/sx;
 # (for what?) * use Subwidget('scrolled') if it exists
 # DONE (MK) * don't give error if -command is not specified
 # DONE (MK) * don't let the user hide columns (minwidth?)
+# DONE (MK) * double click on column should not more execute the single-click command callback
 
 use base qw(Tk::Derived Tk::Button);
 use strict;
@@ -246,7 +247,6 @@ sub ButtonRelease
 
 	$this->{m_X} = -1;
 }
-
 
 # CALLED IF WE DOUBLECLICK
 sub ButtonDouble1
