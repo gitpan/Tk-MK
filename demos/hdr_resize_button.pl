@@ -15,8 +15,10 @@
     my $header0 = $hlist->HdrResizeButton( 
           -text => 'Test Name', 
           -relief => 'flat', -pady => 0, 
-          -command => sub { print "Hello, world!\n";}, 
-          -column => 0
+          -command => sub { print "Hello, world!\n" }, 
+          -column => 0,
+		  -resizerwidth => 3,
+		  -closedminwidth => 20,
     );
 	
     $hlist->header('create', 0, 
@@ -28,8 +30,9 @@
     # CREATE COLUMN HEADER 1
     my $header1 = $hlist->HdrResizeButton( 
           -text => 'Status', 
-          -command => sub { print "Hello, world!\n";}, 
-          -column => 1
+          -command => sub { print "Hello, world2!\n" }, 
+          -column => 1,
+		  
     );
     $hlist->header('create', 1,
           -itemtype => 'window',

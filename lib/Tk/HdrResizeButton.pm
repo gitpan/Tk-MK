@@ -14,6 +14,8 @@ $CheckinUser =~ s/^\$\S+:\s*(.*?)\s*\$$/$1/sx;
 #-------------------------------------------------
 #-- package Tk::HdrResizeButton ---------------------
 #-------------------------------------------------
+use vars qw ($VERSION);
+$VERSION = '1.5';
 
 #########################################################################
 # Tk::HdrResizeButton 
@@ -21,8 +23,8 @@ $CheckinUser =~ s/^\$\S+:\s*(.*?)\s*\$$/$1/sx;
 #           provides methods for resizing a column. This was heavily 
 #	    leveraged from Columns.pm by Damion Wilson.
 # Author:   Shaun Wandler
-# Date:     $Date: 2003/02/17 16:46:54 $
-# Revision: $Revision: 1.3 $
+# Date:     $Date: 2009/04/06 20:46:00 $
+# Revision: $Revision: 1.5 $
 #########################################################################=
 #####
 #
@@ -35,7 +37,8 @@ $CheckinUser =~ s/^\$\S+:\s*(.*?)\s*\$$/$1/sx;
 # (for what?) * use Subwidget('scrolled') if it exists
 # DONE (MK) * don't give error if -command is not specified
 # DONE (MK) * don't let the user hide columns (minwidth?)
-# DONE (MK) * double click on column should not more execute the single-click command callback
+# DONE (MK) * double-click on column should not more execute the single-click command callback
+# DONE (MK) * configurable closedcolWidth, ResizeWidth
 
 use base qw(Tk::Derived Tk::Button);
 use strict;
@@ -65,12 +68,13 @@ sub Populate
 
 	# CREATE THE RESIZE CONTROL
 	my $r_Widget;
+	my $r_width = delete $args->{-resizerwidth} || 1;
 	$r_Widget = $this->Component(
 		'Frame'      => 'Trim_R',
 		#-background  => 'white',
 		#-relief      => 'raised',
 		-borderwidth => 1,
-		-width       => 1,
+		-width       => $r_width,
 		-cursor 	 => 'sb_h_double_arrow',
 	)->place(
 		-bordermode => 'outside',
@@ -99,8 +103,9 @@ sub Populate
 
 	$this->SUPER::Populate($args);
 	$this->ConfigSpecs(
-		-column 			=> [ [ 'SELF', 'PASSIVE' ], 'Column', 'Column', 0 ],
-		-minwidth			=> [ [ 'SELF', 'PASSIVE' ], 'minWidth', 'minWidth', 50 ], 
+		-column 			=> [ [ 'SELF', 'PASSIVE' ], 'column', 'Column', 0 ],
+		-minwidth			=> [ [ 'SELF', 'PASSIVE' ], 'minwidth', 'MinWidth', 50 ], 
+		-closedminwidth		=> [ [ 'SELF', 'PASSIVE' ], 'closedminwidth', 'ClosedMinWidth', 10 ], 
     	-command 			=> [ 'CALLBACK',undef,undef, sub {}],
 		-activebackground	=> [ [ 'SELF', 'PASSIVE' ], 'activebackground', 'activebackground', $this->SUPER::cget(-background) ],
 		-activeforeground	=> [ [ 'SELF', 'PASSIVE' ], 'activeforeground', 'activeforeground', 'red' ],
@@ -109,8 +114,8 @@ sub Populate
 		-pady				=> [ [ 'SELF', 'PASSIVE' ], 'pady', 'pady', 0 ],
 		-padx				=> [ [ 'SELF', 'PASSIVE' ], 'padx', 'padx', 0 ],
 		-pady				=> [ [ 'SELF', 'PASSIVE' ], 'pady', 'pady', 0 ],
-		-anchor				=> [ [ 'SELF', 'PASSIVE' ], 'Anchor', 'Anchor', 'w' ],
-		-lastcolumn			=> [ [ 'SELF', 'PASSIVE' ], 'LastColumn', 'LastColumn', 0 ],
+		-anchor				=> [ [ 'SELF', 'PASSIVE' ], 'anchor', 'Anchor', 'w' ],
+		-lastcolumn			=> [ [ 'SELF', 'PASSIVE' ], 'lastcolumn', 'LastColumn', 0 ],
 		-takefocus			=> [ [ 'SELF', 'PASSIVE' ], 'takefocus', 'TakeFocus', 1 ],
 	);
 
@@ -143,7 +148,7 @@ sub BttnLeave
 sub TrimEnter
 {
 	my $this = shift;
-	if ($this->cget(-lastcolumn)) {
+	if ($this->cget('-lastcolumn')) {
 		$this->Subwidget('Trim_R')->configure(-cursor => undef);
 	}
 	else {
@@ -180,7 +185,7 @@ sub OpenCloseColumn
 	else {
 		$this->{m_ColumClosed}{$column} = 1;
 		$this->{m_LastColumWidth} = $this->parent->columnWidth($column);
-		$this->parent->columnWidth($column, 10);
+		$this->parent->columnWidth($column,  $this->cget('-closedminwidth'));
 		$this->{m_LastAnchor} = $this->cget('-anchor');
 		$this->configure(-anchor => 'w');
 	}
@@ -413,7 +418,16 @@ The relief used for the column Header Button during selected state (Button press
 
 =item B<-minwidth>
 
-The minwidth used for the specific column (during resize).
+The minwidth is used for the specific column (during resize), default: 30.
+
+=item B<-closedminwidth>
+
+The closedminwidth is used for the specific column (while in "CLOSED" view), default: 10.
+
+=item B<-resizerwidth>
+
+The resizerwidth is the resize sensor-area on the right border of the specific column, default: 1.
+
 
 =back
 
@@ -437,6 +451,8 @@ Enhanced/Modified by Michael Krause KrauseM_AT_gmx_DOT_net
 =item DONE (MK) don't give error if -command is not specified
 
 =item DONE (MK) don't let the user hide columns (minwidth?)
+
+=item DONE (MK) * double-click on column should not more execute the single-click command callback
 
 =back
 

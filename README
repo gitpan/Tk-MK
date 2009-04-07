@@ -1,4 +1,4 @@
-Tk-MK version 0.16
+Tk-MK version 0.17
 ==================
 
 Files in Tk-MK are my personal favorite Tk-add-ons. developed in the
@@ -139,5 +139,8 @@ HISTORY:
 
 	o replacement release for 0.15 (which was incomplete)
 
+0.17 Tue Apr  7 12:26:14 CEST 2009
+
+	o update release - added configuration option forClosedColumnWidth and ResizerAreaWidth
 
 __END__

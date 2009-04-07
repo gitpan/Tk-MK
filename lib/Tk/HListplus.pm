@@ -12,6 +12,7 @@
 ##            V0.3	14-Jul-2005 	Bugfix 'header Height' was not called correctly for TK 804.xx. MK
 ##            V0.4	13-Oct-2006 	Enhancement based on feedback from Rob Seegel. MK
 ##            V0.5	06-Apr-2009 	Enhancement based on feedback from Kai Ludick (DblClick on Header always raised HBttn-Cmd-CB). MK
+##            V0.6	07-Apr-2009 	Enhancement based on feedback from Kai Ludick (configurable closedcolWidth, ResizeWidth). MK
 ######################################## EOH ###########################################
 
 ##############################################
@@ -25,7 +26,7 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '0.5';
+$VERSION = '0.6';
 
 ########################################################################
 package Tk::HeaderResizeButton;
@@ -36,8 +37,8 @@ package Tk::HeaderResizeButton;
 #           provides methods for resizing a column. This was heavily 
 #	    leveraged from Columns.pm by Damion Wilson.
 # Author:   Shaun Wandler, Updated by Slaven Rezic and Frank Herrmann, Michael Krause
-# Date:     2004/01/15
-# Revision: 2.0
+# Date:     2009/04/07
+# Revision: 0.6
 #########################################################################=
 # Note: For space reason all other documentation of Tk::HeaderResizeButton has
 # been removed See Tk::HeaderResizeButton-Pod for details.
@@ -61,17 +62,19 @@ sub ClassInit {
 	return $class;
 }
 
-sub Populate {
+sub Populate
+{
 	my ($this, $args) = @_;
 
 	# CREATE THE RESIZE CONTROL
-	my $trim;
-	$trim = $this->Component(
+	my $r_Widget;
+	my $r_width = delete $args->{-resizerwidth} || 1;
+	$r_Widget = $this->Component(
 		'Frame'      => 'Trim_R',
 		#-background  => 'white',
 		#-relief      => 'raised',
 		-borderwidth => 1,
-		-width       => 1,
+		-width       => $r_width,
 		-cursor 	 => 'sb_h_double_arrow',
 	)->place(
 		-bordermode => 'outside',
@@ -86,40 +89,42 @@ sub Populate {
 		-relief      => 'raised',
 		-borderwidth => 2,
 		-width       => 2,
-		#-takefocus	 => 1,
 	);
 
-	$trim->bind( '<ButtonRelease-1>'	=> sub { $this->ButtonRelease(1); } );
-	$trim->bind( '<ButtonPress-1>'		=> sub { $this->ButtonPress(1); } );
-	$trim->bind( '<Motion>' 			=> sub { $this->ButtonOver(1); } );
-	$trim->bind( '<Enter>'				=> sub { $this->TrimEnter(); } ); 
-	$trim->bind( '<Leave>'				=> sub { $this->TrimLeave(); } );
+	$r_Widget->bind( '<ButtonRelease-1>'	=> sub { $this->ButtonRelease(1); } );
+	$r_Widget->bind( '<ButtonPress-1>'		=> sub { $this->ButtonPress(1); } );
+	$r_Widget->bind( '<Motion>' 			=> sub { $this->ButtonOver(1); } );
+	$r_Widget->bind( '<Enter>'				=> sub { $this->TrimEnter(); } ); 
+	$r_Widget->bind( '<Leave>'				=> sub { $this->TrimLeave(); } );
 
-# 			# Override these ones too
-# 			$this->bind( '<Enter>'					=> sub { print "EnterBttn\n"; $this->BttnEnter(); } );
-# 			$this->bind( '<Leave>'					=> sub { $this->BttnLeave(); } );
+	# Override these ones too
+	$this->bind( '<Enter>'					=> sub { $this->BttnEnter(); } );
+	$this->bind( '<Leave>'					=> sub { $this->BttnLeave(); } );
 
 	$this->SUPER::Populate($args);
 	$this->ConfigSpecs(
-		-column 			=> [ [ 'SELF', 'PASSIVE' ], 'Column', 'Column', 0 ],
-		-minwidth			=> [ [ 'SELF', 'PASSIVE' ], 'minWidth', 'minWidth', 30 ], 
+		-column 			=> [ [ 'SELF', 'PASSIVE' ], 'column', 'Column', 0 ],
+		-minwidth			=> [ [ 'SELF', 'PASSIVE' ], 'minwidth', 'MinWidth', 50 ], 
+		-closedminwidth		=> [ [ 'SELF', 'PASSIVE' ], 'closedminwidth', 'ClosedMinWidth', 10 ], 
     	-command 			=> [ 'CALLBACK',undef,undef, sub {}],
 		-activebackground	=> [ [ 'SELF', 'PASSIVE' ], 'activebackground', 'activebackground', $this->SUPER::cget(-background) ],
-		-activeforeground	=> [ [ 'SELF', 'PASSIVE' ], 'activeforeground', 'activeforeground', 'blue' ],
-		-buttondownrelief	=> [ [ 'SELF', 'PASSIVE' ], 'buttondownrelief', 'buttondownrelief', 'flat' ],
+		-activeforeground	=> [ [ 'SELF', 'PASSIVE' ], 'activeforeground', 'activeforeground', 'red' ],
+		-buttondownrelief	=> [ [ 'SELF', 'PASSIVE' ], 'buttondownrelief', 'buttondownrelief', 'groove' ],
 		-relief 			=> [ [ 'SELF', 'PASSIVE' ], 'relief', 'relief', 'flat' ],
+		-pady				=> [ [ 'SELF', 'PASSIVE' ], 'pady', 'pady', 0 ],
 		-padx				=> [ [ 'SELF', 'PASSIVE' ], 'padx', 'padx', 0 ],
 		-pady				=> [ [ 'SELF', 'PASSIVE' ], 'pady', 'pady', 0 ],
-		-anchor				=> [ [ 'SELF', 'PASSIVE' ], 'Anchor', 'Anchor', 'w' ],
-		-lastcolumn			=> [ [ 'SELF', 'PASSIVE' ], 'LastColumn', 'LastColumn', 0 ],
-		#-takefocus			=> [ [ 'SELF', 'PASSIVE' ], 'takefocus', 'TakeFocus', 1 ],
+		-anchor				=> [ [ 'SELF', 'PASSIVE' ], 'anchor', 'Anchor', 'w' ],
+		-lastcolumn			=> [ [ 'SELF', 'PASSIVE' ], 'lastcolumn', 'LastColumn', 0 ],
+		-takefocus			=> [ [ 'SELF', 'PASSIVE' ], 'takefocus', 'TakeFocus', 1 ],
 	);
 
 	# Keep track of last trim widget
-	$this->{m_LastTrim} = $trim;
+	$this->{m_LastTrim} = $r_Widget;
 	# Initialize the Enter/Leave level counter
 	$this->{m_Level} = 0;
 }
+
 # CALLED IF WE ENTER THE HEADER AREA
 sub BttnEnter
 {
@@ -178,7 +183,7 @@ sub OpenCloseColumn
 	else {
 		$this->{m_ColumClosed}{$column} = 1;
 		$this->{m_LastColumWidth} = $this->parent->columnWidth($column);
-		$this->parent->columnWidth($column, 10);
+		$this->parent->columnWidth($column,  $this->cget('-closedminwidth'));
 		$this->{m_LastAnchor} = $this->cget('-anchor');
 		$this->configure(-anchor => 'w');
 	}
@@ -219,7 +224,6 @@ sub ButtonPress
 sub ButtonRelease
 {
 	my ( $this, $p_Trim ) = @_;
-
 	delete $this->{m_ButtonPress};
 	$this->{m_EdgeSelected} = 0;
 	$this->configure(-relief => $this->{m_relief});
@@ -229,7 +233,6 @@ sub ButtonRelease
 
 	if ($this->{m_X} >= 0) {
 		my $l_NewWidth = ( $this->pointerx() - $this->rootx() );
-
 		my $hlist = $this->parent;
 		my $col   = $this->cget( -column );
 		# Better resize to minimum than to do nothing
@@ -252,11 +255,7 @@ sub ButtonRelease
 sub ButtonDouble1
 {
 	my $this = shift;
-	
-	# Cancel a scheduled Release-Bttn-1 - attached Event
 	$this->{m_LastEvent} = 'DoubleClick';
-
-	# Execute the double-click default action
 	$this->OpenCloseColumn();
 }
 
@@ -520,11 +519,20 @@ The relief used for the column Header Button during selected state (Button press
 
 =item B<-minwidth>
 
-The minwidth used for the specific column (during resize), default: 30.
+The minwidth is used for the specific column (during resize), default: 30.
+
+=item B<-closedminwidth>
+
+The closedminwidth is used for the specific column (while in "CLOSED" view), default: 10.
+
+=item B<-resizerwidth>
+
+The resizerwidth is the resize sensor-area on the right border of the specific column, default: 1.
+
 
 =item B<-headerstyle>
 
-An alternative Header style, which will be ther default for all columns unless you specify
+An alternative Header style, which will be the default for all columns unless you specify
 -style ... for a dedicated header-create() call column.
 
 =back

@@ -121,6 +121,9 @@ Revision history for Perl extension Tk-MK.
 
 	o replacement release for 0.15 (which was incomplete)
 
+0.17 Tue Apr  7 12:26:14 CEST 2009
+
+	o update release - added configuration option forClosedColumnWidth and ResizerAreaWidth
 
 ---------------------------------------------------------------
 
