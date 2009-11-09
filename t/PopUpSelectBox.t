@@ -3,7 +3,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 16 };
+BEGIN { plan tests => 17 };
 
 my $widget;
 
@@ -17,8 +17,9 @@ ok($@, "", "can't create MainWindow");
 ok(Tk::Exists($mw), 1, "MainWindow creation failed");
 
 #--------------------------------------------------------------
-my $class = 'Checkbox';
-my $dummyvar = '0';
+my $class = 'PopUpSelectBox';
+my $foo = '12';
+my @opt = (0..20);
 #--------------------------------------------------------------
 print "Testing $class\n";
 
@@ -36,16 +37,20 @@ if (Tk::Exists($widget)) {
     eval { $mw->update; };
     ok ($@, "", "Error during 'update' for $class widget");
 	#------------------------------------------------------------------
-    eval { $widget->configure( -variable => \$dummyvar); };
+    eval { $widget->configure( -variable => \$foo); };
     ok ($@, "", "Error: can't configure  '-variable' for $class widget");
     eval { $widget->configure( -command  => \&test_cb ); };
     ok ($@, "", "Error: can't configure  '-command' for $class widget");
-    eval { $widget->configure( -onvalue  => 'Up' ); };
-    ok ($@, "", "Error: can't configure  '-onvalue' for $class widget");
-    eval { $widget->configure( -offvalue => 'Down' ); };
-    ok ($@, "", "Error: can't configure  '-offvalue' for $class widget");
+    eval { $widget->configure( -options => \@opt ); };
+    ok ($@, "", "Error: can't configure  '-options' for $class widget");
+
+	#------------------------------------------------------------------
+	#those tests are snipped from original TK/optmenu.t
+	ok($ {$widget->cget(-variable)}, $foo, "setting of -variable failed");
+	ok($widget->cget(-variable),\$foo, "Wrong variable");
+
 	
-	# here we need some more tests
+	# here we might need some more tests
 	#...
 	
 	#------------------------------------------------------------------
@@ -63,7 +68,7 @@ if (Tk::Exists($widget)) {
 }
 sub test_cb
 {
-	print "test_cb called with [@_], \$dummyvar = >$dummyvar<\n";
+	print "test_cb called with [@_], \$dummyvar = >$foo<\n";
 }
 
 1;

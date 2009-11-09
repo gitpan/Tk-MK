@@ -3,7 +3,7 @@
 use Test;
 use strict;
 
-BEGIN { plan tests => 16 };
+BEGIN { plan tests => 13 };
 
 my $widget;
 
@@ -17,15 +17,31 @@ ok($@, "", "can't create MainWindow");
 ok(Tk::Exists($mw), 1, "MainWindow creation failed");
 
 #--------------------------------------------------------------
-my $class = 'Checkbox';
-my $dummyvar = '0';
+my $class = 'CompoundButton';
+my $downangle = <<'downangle_EOP';
+    /* XPM */
+    static char *arrow[] = {
+    "14 9 2 1",
+    ". c none",
+    "X c black",
+    "..............",
+    "..............",
+    ".XXXXXXXXXXXX.",
+    "..XXXXXXXXXX..",
+    "...XXXXXXXX...",
+    "....XXXXXX....",
+    ".....XXXX.....",
+    "......XX......",
+    "..............",
+    };
+downangle_EOP
 #--------------------------------------------------------------
 print "Testing $class\n";
 
 eval "require Tk::$class;";
 ok($@, "", "Error loading Tk::$class");
 
-eval { $widget = $mw->$class(); };
+eval { $widget = $mw->$class(-text => 'test', -bitmap => 'error', -side => 'bottom'); };
 ok($@, "", "can't create $class widget");
 skip($@, Tk::Exists($widget), 1, "$class instance does not exist");
 
@@ -36,14 +52,8 @@ if (Tk::Exists($widget)) {
     eval { $mw->update; };
     ok ($@, "", "Error during 'update' for $class widget");
 	#------------------------------------------------------------------
-    eval { $widget->configure( -variable => \$dummyvar); };
-    ok ($@, "", "Error: can't configure  '-variable' for $class widget");
     eval { $widget->configure( -command  => \&test_cb ); };
     ok ($@, "", "Error: can't configure  '-command' for $class widget");
-    eval { $widget->configure( -onvalue  => 'Up' ); };
-    ok ($@, "", "Error: can't configure  '-onvalue' for $class widget");
-    eval { $widget->configure( -offvalue => 'Down' ); };
-    ok ($@, "", "Error: can't configure  '-offvalue' for $class widget");
 	
 	# here we need some more tests
 	#...
@@ -63,7 +73,7 @@ if (Tk::Exists($widget)) {
 }
 sub test_cb
 {
-	print "test_cb called with [@_], \$dummyvar = >$dummyvar<\n";
+	print "test_cb called with [@_].\n";
 }
 
 1;

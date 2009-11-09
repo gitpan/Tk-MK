@@ -1,7 +1,7 @@
 ######################################## SOH ###########################################
 ## Function : Additional Tk Class for Listbox-type HList with Data per Item, Sorting
 ##
-## Copyright (c) 2002-2009 Michael Krause. All rights reserved.
+## Copyright (c) 2002-2005 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
 ## under the same terms as Perl itself.
 ##
@@ -10,16 +10,15 @@
 ##            V1.02 19-Jan-2004 	Added numeric sorting for column 2. MK
 ##            V1.1  13-May-2005 	Added missing data for sorting in column 2. MK
 ##            V1.2  23-Oct-2008 	Bugfix: Deleting the first entry messed the reverse func. MK
-##            V2.0  11-Sep-2009 	Rewrite: Added multi-Column and Header support. MK
-##            V2.1  141-Sep-2009 	Bugfix: Solved problems with memory leak due Itemstyle. MK
 ##
 ######################################## EOH ###########################################
-package Tk::DHList;
+package Tk::DHList_v1;
 
 ##############################################
 ### Use
 ##############################################
-use Tk::HList;
+#use Tk::HList;
+use Tk::HListplus;
 use Tk::ItemStyle;
 use Tk qw(Ev);
 
@@ -27,16 +26,13 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '2.1';
+$VERSION = '1.2';
 
-use base qw (Tk::Derived Tk::HList);
+#use base qw (Tk::Derived Tk::HList);
+use base qw (Tk::Derived Tk::HListplus);
 
-use constant DEFAULT_COLUMN_SEPARATOR	=> '|';
 ########################################################################
-Construct Tk::Widget 'DHList';
-
-# Class Variables
-my ($DataStyles, $HeaderStyle);
+Construct Tk::Widget 'DHList_v1';
 
 #---------------------------------------------
 # internal Setup function
@@ -60,20 +56,11 @@ sub ClassInit
 sub CreateArgs
 {
     my ($class, $window, $args) = @_;
-
-	# Convenience function - calculate coulncount from the headline
-	if ($args->{-headline} and not $args->{-columns}) {
-		my $columnseparator = $args->{-columnseparator} || DEFAULT_COLUMN_SEPARATOR();
-		my $pattern = quotemeta $columnseparator;
-		@_ = split(/$pattern/, $args->{-headline});
-	    $args->{-columns} = scalar @_;
-	}
-
- 	# Necessarily Set/Patch Column-Count to accept a multi-purpose data-column
-	$args->{-columns} = 1 unless $args->{-columns};
-	$args->{-columns}++;
 	
-	$class->SUPER::CreateArgs($window, $args);
+	# Necessarily Patch Columns
+	my %args;	
+	(%args) = ( -columns => '2') unless defined $args->{-columns};
+    ($class->SUPER::CreateArgs($window, $args), %args);
 }
 
 #---------------------------------------------
@@ -81,91 +68,42 @@ sub CreateArgs
 #---------------------------------------------
 sub Populate
 {
-	# Parameters
     my ($this, $args) = @_;		
 
-	# Locals
-	my ($headline, $headerforeground, $headerbackground,$headerfont, $headerrelief,
-		$data_background, $datastyle, $headerstyle);
-
-	$headline			= delete $args->{-headline}; $args->{-header} = 1 if $headline; # Convenience
-	$headerforeground	= delete $args->{-headerforeground};
-	$headerbackground	= delete $args->{-headerbackground};
-	$headerfont 		= delete $args->{-headerfont} || 'Helvetica -10';
-	$headerrelief		= delete $args->{-headerrelief} || 'groove';
-
-	$data_background = delete $args->{-databackground};
+	my $data_background = delete $args->{-databackground};
 	$data_background = $this->cget ('-background') unless defined $data_background;
-	
-	# Unique Style generation
-	$datastyle = delete $args->{-datastyle};
-	$datastyle = $this->toplevel->ItemStyle('text', -anchor => 'e', -background => $data_background) unless $datastyle;
-	$headerstyle = delete $args->{-headerstyle};
-	$headerstyle = $this->toplevel->ItemStyle('window', -padx => 0, -pady => 0) unless $headerstyle;
+	my $style = delete $args->{-datastyle};
+	$style = $this->toplevel->ItemStyle ('text' ,
+							-anchor => 'e',
+							-background => $data_background,
+	) unless defined $style;
 
 	# Check whether we want numeric sorting
 	$this->{m_numeric_primary_sort}   = delete $args->{-numeric_primary_sort} || 0;
 	$this->{m_numeric_secondary_sort} = delete $args->{-numeric_secondary_sort} || 0;
 	
 	# Reroute any size_call_back
-	my $sizecmd = delete $args->{-sizecmd} || sub { 1 };
+	my $sizecmd = delete $args->{-sizecmd};
+	$sizecmd = sub { return 1 } unless defined $sizecmd;
 	$args->{-sizecmd} = [\&resize_cb, $this ];
 
 	#INvoke Superclass fill func
     $this->SUPER::Populate($args);
 
+	#
 	$this->ConfigSpecs(
 	#default listbox options
- 		-highlightthickness		=> [['SELF', 'PASSIVE'], 'HighlightThickness', 'highlightthickness', '2'],
 		-pady					=> [['SELF', 'PASSIVE'], 'pady', 'Pad', '0'],
     	-sizecmd_cb 	        => ['CALLBACK',undef, undef, $sizecmd],
 	# new, additional optiona
 		-viewtype				=> ['METHOD', 'ViewType', 'viewType', undef],		
- 		-datastyle				=> [['SELF', 'PASSIVE'], 'DataStyle', 'datastyle', $datastyle],
- 		-columnseparator		=> [['SELF', 'PASSIVE'], 'ColumnSeparator', 'columnseparator', DEFAULT_COLUMN_SEPARATOR],
-		-databackground 		=> [['SELF','METHOD'], 'databackground', 'dataBackground', undef],		
-	# define a compound setting to adress BG-changes to both, the normal AND the data column
-		-bg 			  		=> [{-background => $this, -databackground => $this}, 'background', 'Background', undef],		
+ 		-datastyle				=> [['SELF', 'PASSIVE'], 'datastyle', 'datastyle', $style],
 	);
-
-	if ($headline) {
-		### NOTE: For whatever reasons the filling of an appropriate Header-BG (and some ->cget())
-		### will only work if it is done deferred ...
-		$this->afterIdle( sub {
-			my ($columnseparator, $pattern, $data_pos, @line, $col);
-			$columnseparator = $this->cget('-columnseparator');
-			$pattern = quotemeta $columnseparator;
-			$data_pos  = $this->cget('-columns') - 1; 
-			@line = split(/$pattern/, $headline, $data_pos);
-			if (@line) {
-				# Take care, if the headline is too short
-				if (@line < $data_pos+1) {
-					for ($col = @line; $col <= $data_pos; $col++) {
-						$line[$col] = '';
-					}
-				}
-				# Add a dummy Header Label for the DataColumn
-				$line[-1] = 'DATA'; $col = 0;
-
-				# now add ALL columns to the header-line
-				foreach $pattern (@line) {
-					my $headerlabel = $this->Label( -text => $pattern, -font => $headerfont,
-									(-foreground => $headerforeground ? $headerforeground : $this->cget('-background')),
-									$headerbackground ? (-background => $headerbackground) : () );
-					$this->headerCreate($col++,
-									-style => $headerstyle,
-									-itemtype => 'window',
-									-widget => $headerlabel, -relief => $headerrelief,
-									$headerbackground ? (-headerbackground => $headerbackground) : () );
-				}	
-			}
-		});
-	}
-	
+		
 	# Internal Presets
-	$this->{m_viewtype} 	= 'none';	
-	$this->{m_backlist} 	= {};	
-	$this->{m_index} 		= 0;	
+	$this->{m_firstpath}	= undef;
+	$this->{m_datastyle}	= $style;
+	$this->{m_viewtype} 	= '---';	
 }
 
 #---------------------------------------------
@@ -173,51 +111,36 @@ sub Populate
 #---------------------------------------------
 sub add 
 {
-	# Parameters
-	my ($this, $path, %args) = @_;
-
 	# Locals
-	my ($data, $datastyle, @line, $col, $data_pos, $pattern);
+	my ($this, $path, %args, $data, $datastyle);
+
+	# Parameters
+	$this = shift;
+	$path = shift;
+	%args = @_;
 	
 	# Do we have anything at all to insert ?
-	return unless defined $path;
-
-	$this->{m_backlist}{$path} = {
-				args		=> { %args },
-				index		=> ++$this->{m_index},
-	};
+	return unless @_;
 
 	# Prepare the data and it's style
-	$data		= delete $args{-data};
-	$datastyle	= delete $args{-datastyle} || $this->cget('-datastyle');
-	# Some local shortcuts
-	$data_pos   = $this->cget('-columns') - 1; 
-	$pattern	= quotemeta $this->cget('-columnseparator');
-	$col		= 0;
+	$data		= (defined $args{-data}) ? delete $args{-data} : 'undef';
+	$datastyle	= (defined $args{-datastyle}) ? delete $args{-datastyle} : $this->{m_datastyle};
 
-	# Eventually split into additional columns
-	@line = split(/$pattern/, $args{-text}, $data_pos);
-
-	# Create a new entry
+	# now add it as desired
 	$this->SUPER::add($path, -data => $data);
-	# now add ALL columns to the entry
-	foreach $pattern (@line) {
-		$args{-text} = $pattern;
-		if ($col > 0) {
-			delete $args{-image};
-			$args{-itemtype} = 'text';
-		}
-		$this->SUPER::itemCreate($path, $col++, %args);
-	}	
-
-	# and a trailing column for the data
-	$this->SUPER::itemCreate($path, $data_pos,
+	$this->SUPER::itemCreate($path, 0, %args);
+	# and a second column for the data
+	$this->SUPER::itemCreate($path, 1,
 					-itemtype => 'text',
-					-text => '' . ($data||''), # Note the first ''. which is necessary to cast the data ptr to text
+					-text => $data,
 					-style => $datastyle,
 	);
+	# store it internally
+	$this->{m_firstpath} = $path unless defined $this->{m_firstpath};
+	# store it internally
+	$this->{m_datastyle}{$path} = $datastyle;
 	
-	# Install the 'normal view after we have something on the screen
+	# Install the 'normal view after we have something on the screen..
 	$this->viewtype($this->{m_viewtype});
 }
 
@@ -231,13 +154,17 @@ sub delete
 
 	if ($what eq 'all') {
 		# Clear the internal storage
-		$this->{m_index} = 0;	
+		$this->{m_firstpath}	= undef;
 		# Delete it
 		$this->SUPER::delete($what);
 	}
 	else {
-		# Delete it from internal storage list
-		delete $this->{m_backlist}{$path};
+		# Clear the internal storage
+		if (defined $this->{m_firstpath}) {
+			if ($path eq $this->{m_firstpath}) {
+				$this->{m_firstpath} = $this->infoNext($path);
+			}
+		}
 		# Delete it
 		$this->SUPER::delete($what, $path);
 	}
@@ -248,9 +175,53 @@ sub delete
 #---------------------------------------------
 sub reverse
 {
+	# Locals
+	my ($this, @paths, $path, @allitems, $opt, $value, %items, %data, %hidden);
+
 	# Parameters
-	my $this = shift;
-	$this->_rebuild_list('reverse');
+	$this = shift;
+
+	# safety check
+	return unless defined $this->{m_firstpath};
+	# Retrieve the contents
+	$path = $this->{m_firstpath};
+	while (defined $path && $path ne "") {
+		push @paths, $path;
+		#----------------------------------
+		@allitems = $this->itemConfigure($path, 0);
+		my %args = ();
+		foreach (@allitems) {
+			$opt = $_->[0]; $value = $_->[4];
+			if (defined $value && $value ne "") {
+				$args{$opt} = $value;
+			}
+		}	
+		$items{$path} = \%args;
+		#----------------------------------
+		my $data = $this->infoData($path);
+		#print "retrieved data $data<\n";
+		$data{$path} = $data;
+		#----------------------------------
+		my $hidden = $this->infoHidden($path);
+		#print "retrieved hidden $hidden<\n";
+		$hidden{$path} = $hidden;
+		#----------------------------------
+		$path = $this->infoNext($path);
+	}
+	# delete it
+	$this->delete('all');
+
+	$this->{m_firstpath} = undef;
+		
+	# Reverse, refill it
+	foreach ( reverse @paths ) {
+		$this->add( $_, -data => $data{$_},
+					%{$items{$_}} );
+		if ($hidden{$_} == 1) {
+			$this->hide('entry', $_);
+		}
+		$this->{m_firstpath} = $_ unless defined $this->{m_firstpath};
+	}
 }
 
 #---------------------------------------------
@@ -258,53 +229,87 @@ sub reverse
 #---------------------------------------------
 sub sort
 {
-	# Parameters
-	my ($this, $mode) = @_;
-
 	# Locals
-	my ($sort_func, $backlist, $i, $path);
+	my ($this, $mode, @paths, $path, @allitems, $opt, $value, %items, %data, %hidden,
+		 @sortarray, @tmparray);
+	#print "begin of sort\n";
+
+	# Parameters
+	$this	= shift;
+	$mode	= shift; $mode = 'ascending' unless defined $mode;
 
 	# safety check
-	return unless $this->infoChildren;
-	$mode = 'ascending' unless $mode;
+	return unless defined $this->{m_firstpath};
 
-	# Shortcut for speed
-	$backlist = $this->{m_backlist};
+	# Retrieve the contents
+	$path = $this->{m_firstpath};
+	while (defined $path && $path ne "") {
+		push @paths, $path;
+		#----------------------------------
+		@allitems = $this->itemConfigure($path, 0);
+		my %args = ();
+		foreach (@allitems) {
+			$opt = $_->[0]; $value = $_->[4];
+			#$opt = 'undef' unless defined $opt;
+			#$value = 'undef' unless defined $value;
+			#print "retrieved \$opt = >$opt<, \$value = >", defined $value ? $value : 'undef', ,"<\n";
+			if (defined $value && $value ne "") {
+				$args{$opt} = $value;
+			}
+		}	
+		$items{$path} = \%args;
+		#----------------------------------
+		my $data = $this->infoData($path);
+		#print "retrieved data $data<\n";
+		$data{$path} = $data;
+		#----------------------------------
+		my $hidden = $this->infoHidden($path);
+		#print "retrieved hidden $hidden<\n";
+		$hidden{$path} = $hidden;
+		#----------------------------------
+		$path = $this->infoNext($path);
+	}
+	# delete it
+	$this->delete('all');
+	
+	foreach (@paths) {
+		push @sortarray, [ $_, $items{$_}->{-text}, $data{$_} ];
+	}
 
 	# sort it
 	if ($mode =~ /ascending/i) {
-		if ($mode =~ /data|secondary/i) {
+		if ($mode =~ /secondary/i) {
 			if ($this->{m_numeric_secondary_sort}) {
-				$sort_func = sub { $backlist->{$a}{args}{-data} <=> $backlist->{$b}{args}{-data} };
+				@tmparray = sort secondary_numeric @sortarray;
 			}
 			else {
-				$sort_func = sub { $backlist->{$a}{args}{-data} cmp $backlist->{$b}{args}{-data} };
+				@tmparray = sort secondary @sortarray;
 			}
 		}
 		else {
 			if ($this->{m_numeric_primary_sort}) {
-				$sort_func = sub { $backlist->{$a}{args}{-text} <=> $backlist->{$b}{args}{-text} };
+				@tmparray = sort primary_numeric @sortarray;
 			}
 			else {
-				$sort_func = sub { $backlist->{$a}{args}{-text} cmp $backlist->{$b}{args}{-text} };
+				@tmparray = sort primary @sortarray;
 			}
 		}
 	}
 	elsif ($mode =~ /descending/i) {
-		if ($mode =~ /data|secondary/i) {
+		if ($mode =~ /secondary/i) {
 			if ($this->{m_numeric_secondary_sort}) {
-				$sort_func = sub { $backlist->{$b}{args}{-data} <=> $backlist->{$a}{args}{-data} };
+				@tmparray = sort rev_secondary_numeric @sortarray;
 			}
 			else {
-				$sort_func = sub { $backlist->{$b}{args}{-data} cmp $backlist->{$a}{args}{-data} };
+				@tmparray = sort rev_secondary @sortarray;
 			}
 		}
 		else {
 			if ($this->{m_numeric_primary_sort}) {
-				$sort_func = sub { $backlist->{$b}{args}{-text} <=> $backlist->{$a}{args}{-text} };
+				@tmparray = sort rev_primary_numeric @sortarray;
 			}
 			else {
-				$sort_func = sub { $backlist->{$b}{args}{-text} cmp $backlist->{$a}{args}{-text} };
+				@tmparray = sort rev_primary @sortarray;
 			}
 		}
 	}
@@ -312,73 +317,52 @@ sub sort
 		return;
 	}
 	
-	# sort it
-	foreach $path (sort $sort_func keys %$backlist) {
-		$backlist->{$path}{index} = ++$i;
+	#
+	$this->{m_firstpath} = undef;	
+	
+	# refill it
+	foreach ( @tmparray ) {
+		$path = $_->[0];
+		$this->add( $path, -data => $data{$path},
+					%{$items{$path}}, -datastyle => $this->{m_datastyle}{$path} );
+		if ($hidden{$path} == 1) {
+			$this->hide('entry', $path);
+		}
+		$this->{m_firstpath} = $path unless defined $this->{m_firstpath};
 	}
-
-	# apply sorting to the list
-	$this->_rebuild_list();
 }
-
-#---------------------------------------------
-# INTERNAL: rebuild list function
-#---------------------------------------------
-sub _rebuild_list 
+sub secondary
 {
-	# Parameters
-	my ($this, $reverse_mode) = @_;
-
-	# Locals
-	my ($path, $backlist, $sort_func);
-
-	# safety check
-	return unless $this->infoChildren;
-
-	# Store the backlist
-	$backlist = $this->{m_backlist};
-	$this->{m_backlist} = {};
-
-	# Retrieve the current visability statets
-	foreach $path (keys %$backlist) {
-		$backlist->{$path}{hidden} = $this->infoHidden($path);
-	}
-
-	# delete it
-	$this->delete('all');
-
-	# Define a reverse-sort func
-	if ($reverse_mode) {
-		$sort_func = sub { $backlist->{$b}{index} <=> $backlist->{$a}{index} }
-	}
-	else { # just follow the indexing
-	    $sort_func = sub { $backlist->{$a}{index} <=> $backlist->{$b}{index} }
-	}
-
-	# Std/Reverse refill it
-	foreach $path (sort $sort_func keys %$backlist) {
-		$this->add($path, %{$backlist->{$path}{args}});
-		$this->hide('entry', $path) if $backlist->{$path}{hidden};
-	}
+	$a->[2] cmp $b->[2];
 }
-
-
-#---------------------------------------------
-# ADD-ON: do add. background changes -
-# optionally update the data background too
-#---------------------------------------------
-sub databackground
+sub rev_secondary
 {
-	# Parameters
-	my ($this, $new_background)  = @_;
-
-	# Fetch the existing background
-	my $datastyle = $this->_cget('-datastyle');
-	my $background = $datastyle->cget('-background');
-	$datastyle->configure('-background', $new_background) if $new_background;
-	return $background;
+	$b->[2] cmp $a->[2];
 }
-
+sub secondary_numeric
+{
+	$a->[2] <=> $b->[2];
+}
+sub rev_secondary_numeric
+{
+	$b->[2] <=> $a->[2];
+}
+sub primary
+{
+	$a->[1] cmp $b->[1];
+}
+sub rev_primary
+{
+	$b->[1] cmp $a->[1];
+}
+sub primary_numeric
+{
+	$a->[1] <=> $b->[1];
+}
+sub rev_primary_numeric
+{
+	$b->[1] <=> $a->[1];
+}
 
 #---------------------------------------------
 # ADD-ON: trace any viewtype updates
@@ -388,9 +372,9 @@ sub viewtype
 {
 	# Parameters
 	my ($this, $viewtype)  = @_;
-
 	# if we're not in a cget we might consider changing the value
 	if (defined $viewtype) {
+		#print "we're in viewtype with $viewtype\n";
 		# allow only 'normal' &  'withdata'...
 		if ($viewtype =~ /withdata/i ) {
 			$viewtype = 'withdata';
@@ -398,6 +382,7 @@ sub viewtype
 		else {
 			$viewtype = 'normal';
 		}
+		#
 		#print "internal viewtype is $this->{m_viewtype}\n";
 		if ($this->{m_viewtype} ne $viewtype) {
 			$this->{m_viewtype} = $viewtype;
@@ -417,50 +402,49 @@ sub setup_view
 	my $this = shift;
 
 	# Locals
-	my (@bb, $needsize, $data_col, $col_size, $col);
-
-	return unless $this->infoChildren;
-	$data_col = $this->cget('-columns') - 1;
-
-	if ($this->{m_viewtype} eq 'withdata' ) {
-		$this->columnWidth($data_col, '');
-		$needsize = $this->columnWidth($data_col);
-		@bb = $this->infoBbox(($this->infoChildren)[0]);
-		if (@bb) {
-			$col_size = 0;
-			for ($col = 1; $col < $data_col; $col++) {
-				$col_size += $this->columnWidth($col);
-			}
-			$col_size = $bb[2] - $bb[0] - $col_size - $needsize;
-			$col_size = 20 if $col_size < 20;
-			$this->columnWidth(0, $col_size);
-		}
+	my (@bb, $needsize);
+	#print "firstpath = ", (defined $this->{m_firstpath}) ? $this->{m_firstpath} : "undef";
+	return unless defined $this->{m_firstpath};
+	#print "in setupview\n";
+	if ($this->{m_viewtype} eq 'withdata') {
+		$this->columnWidth(1, '');
+		$needsize = $this->columnWidth(1);
 	}
 	else {
-		$this->columnWidth($data_col, 0);
-		$this->columnWidth(0, '');
+		$this->columnWidth(1, 0);
+		$needsize = 0;
+	}
+	@bb = $this->infoBbox($this->{m_firstpath});
+	# Fast hack to avoid empty bbox due to invisible first item
+	if (@bb == 0) {
+		my $path = $this->nearest(10);
+		@bb = $this->infoBbox($path);
+	}
+	#print "bbox is @bb<, needsize is $needsize\n";
+	if (@bb) {
+		$this->columnWidth(0, $bb[2] - $bb[0] - $needsize);
 	}
 }
-
 
 #---------------------------------------------
 # ADD-ON: new resizxing function
 #---------------------------------------------
 sub resize_cb
 {
-	# Parameters
-    my $this = shift;
-	# Locals
-	my (@bb, $needsize, $data_col, $col_size, $col);
-
+    my ($this) = shift;
+	return unless defined $this->{m_firstpath};
 	return unless $this->viewable;
-	return unless $this->infoChildren;
-
-	# Adopt the column Widths
-	$this->setup_view();
+	
+	my $path0 = $this->{m_firstpath};
+	my @bb = $this->infoBbox($path0);
+	#print "bbox is >@bb<\n";
+	return if ((scalar @bb == 0) || ($bb[2] - $bb[0] == 0));
+	my $needsize = $this->columnWidth(1);
+	$this->columnWidth(0, $bb[2] - $bb[0] - $needsize);
 
 	# invoke any given callback
-	$this->Callback(-sizecmd_cb => $this);
+	my @args = ( $this );
+	$this->Callback(-sizecmd_cb => @args);
 }
 
 
@@ -521,12 +505,11 @@ sub _get_item
 	my (@items_out);
 
 	if ($mode & 1) {
-		push @items_out, $this->{m_backlist}{$path}{args}{-text};
+		push @items_out, $this->itemCget($path, 0, '-text');
 	}
 	if ($mode & 2) {
 		push @items_out,  $this->infoData($path);
 	}
-	
 	return wantarray ? @items_out : $items_out[0];
 }
 
@@ -570,16 +553,22 @@ sub getcurselection_value
 sub _getcurselection
 {
 	# Parameters
-	my ($this, $mode) = @_;
+	my ($this) = shift;
+	my ($mode) = shift;
 
 	# Locals
 	my (@items_out, @selitems, $path);
 
 	# get index information	
 	@selitems = $this->infoSelection;
- 	foreach $path (@selitems) {
-		push @items_out, $this->_get_item($mode, $path);
- 	}
+	foreach $path (@selitems) {
+		if ($mode & 1) {
+			push @items_out, $this->itemCget($path, 0, '-text' );
+		}
+		if ($mode & 2) {
+			push @items_out, $this->infoData($path);
+		}
+	}
 	return wantarray ? @items_out : $items_out[0];
 }
 
@@ -641,7 +630,8 @@ Tk::DHList - A HList widget with a visible/hidden data column
 
 =head1 DESCRIPTION
 
-A HList derived widget that offers several add-on functions like sorting, reordering and inserting/retrieving of item text & data, 
+A HList derived widget that offers several add-on functions like in-place-editing,
+sorting, reordering and inserting/retrieving of item text & data, 
 suitable for perl Tk800.x (developed with Tk800.024).
 
 You can insert item-texts or item-text/-value pair/s into the DHList widget with
@@ -660,9 +650,15 @@ For scalar mode same rule applies as for B<get_item>.
 
 B<reverse()> reverses the whole list and all item values.
 
-B<sort()> sorts the whole list (alpha)numerical and reorders all entries.
-Depending on the sortmode either the first column content or the data column content is used as
-the searchkey. 
+B<sort()> sorts the whole list alphanumerical and reorders and all items and belonging
+
+B<Configure()> understands the new editing-related options B<-editactivationEvent>,
+B<-editfinishonLeave>, B<-posteditcommand> and B<-validate>. The first one allows to
+specify an event descriptor for the activation of the Editing features, 
+the second enables the automatic finish-edit feature if the mouse leaves the edit-area,
+The others may be used to specify callbacks: One for postprocessing after editing is
+finished and the other one, which can be used to perform validation operations
+during editing.
 
 B<viewtype()> might be invoked directly or via I<configure> to switch between
 'withdata' or 'normal' listbox view.
@@ -711,10 +707,8 @@ work anlogous but for texts/values only
 
 =item B<sort()>
 
-'sort($sortmode)' sorts the whole list (alpha)numerical. 
-Available Sortmodes are:  B<ascending>, B<descending>, B<ascending data'> or
- B<descending data'> (case-insensitiv, order of sortmode-keywords does not matter).
- 
+'sort($direction)' sorts the whole list alphanumerical. The direction parameter
+may be 'I<ascending>' or 'I<descending>'
 
 
 =item B<viewtype()>
@@ -730,63 +724,29 @@ the extended one 'withdata', that shows a second column with all the belonging d
 
 =over 4
 
-=item B<viewtype>
+=item B<viewtype()>
 
 '-viewtype()' switches the listbox' visible area between the 'normal' view and
 the extended one 'withdata', that shows a second column with all the belonging data.
 
-=item B<datastyle>
+=item B<datastyle()>
 
 '-datastyle()' allows to specify an ItemStyle for the data column (see Tk::ItemStyle for details).
 
-=item B<databackground>
+=item B<databackground()>
 
 '-databackground()' allows to specify just a different background color for the data column.
 Note that it still uses the build-in ItemStyle (beside bg-color) for the data column.
 
-=item B<numeric_primary_sort>
+=item B<numeric_primary_sort()>
 
 '-numeric_primary_sort()' allows to enable numeric ordering for the internal sort()
 function (numeric on primary keys / first column).
 
-=item B<numeric_secondary_sort>
+=item B<numeric_secondary_sort()>
 
 '-numeric_secondary_sort()' allows to enable numeric ordering for the internal sort()
-function (numeric on secondary keys / data column).
-
-=item B<columnseparator>
-
-'-columnseparator' allows to specify a different column separator char (default is '|')
-If a multicolumn layout is desired simply specify B<'-columns'> option and supply a combined
-string (-text) to the add() function
-$list->add( -text => 'Entry|Col2|col3|col4', ... );
-
-
-=item B<headline>
-
-'-headline' allows to specify a I<combined string> for all column headers (uses the column separator)
-
-
-=item B<headerforeground>
-
-'-headerforeground' allows to specify a different HeaderFOREground (default is List's I<Background> color)
-
-
-=item B<headerbackground>
-
-'-headerbackground' allows to specify a different HeaderBACKground (default is NO color)
-
-
-=item B<headerfont>
-
-'-headerfont' allows to specify a different HeaderFONT (default is 'Helvetica -10')
-
-
-=item B<headerrelief>
-
-'-headerrelief' allows to specify a different HeaderRELIEF (default is 'groove')
-
-
+function (numeric on secondary keys / second column).
 
 =back
 
@@ -796,7 +756,7 @@ Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 
-V2.1  (C) Sept 2009
+V1.1  (C) May 2005
 
 =cut
 

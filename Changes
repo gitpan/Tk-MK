@@ -123,8 +123,24 @@ Revision history for Perl extension Tk-MK.
 
 0.17 Tue Apr  7 12:26:14 CEST 2009
 
-	o update release - added configuration option forClosedColumnWidth and ResizerAreaWidth
+	o update release - added configuration option for ClosedColumnWidth and ResizerAreaWidth
 
+0.18 Fri Sep 11 21:58:55 CEST 2009
+
+	o Rewritten DHList megawidget to support mutiple columns and auto-generated headers
+
+0.20 Sun Nov  8 16:15:12 CET 2009
+
+	o Completely rewritten Tk::Buttonplus Widget and renamed it to Tk::CompoundButton to honor the fact that it
+	  is based on the Tk::Compound methods
+	  This rewrite resolves some minor graphical flaws happening at Buttonplus under certain circumstances
+	  
+	o Fixed a problem in DHList: '-bg'/'-background' did not automatically influence the "data-field-area background"
+	  ( A problem for list that change their background dynamically during operation )
+	  As a work-around solution '-bg' now will set the main background AND the data-field background, while
+	  '-background' changes only the main area BG.
+	  
+	
 ---------------------------------------------------------------
 
 TODO: Still some more work needed on the tests ...

@@ -11,7 +11,7 @@ eval { require Tk; };
 ok($@, "", "loading Tk module");
 
 my $mw;
-eval {$mw = Tk::MainWindow->new();};
+eval {$mw = MainWindow->new() };
 ok($@, "", "can't create MainWindow");
 
 ok(Tk::Exists($mw), 1, "MainWindow creation failed");
