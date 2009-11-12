@@ -1,4 +1,4 @@
-Tk-MK version 0.20
+Tk-MK version 0.21
 ==================
 
 Files in Tk-MK are my personal favorite Tk-add-ons. developed in the
@@ -164,5 +164,8 @@ HISTORY:
 	  '-background' changes only the main area BG.
 	  
 	  
+ Version 0.21 Update release
+
+	o Modified t/* tests to comply with new Tk w/o X11 env behavior (see http://wiki.cpantesters.org/wiki/CPANAuthorNotes)
 	  
 __END__

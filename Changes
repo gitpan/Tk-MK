@@ -140,6 +140,9 @@ Revision history for Perl extension Tk-MK.
 	  As a work-around solution '-bg' now will set the main background AND the data-field background, while
 	  '-background' changes only the main area BG.
 	  
+0.21 Thu Nov 12 19:17:42 CET 2009
+
+	o Modified t/* tests to comply with new Tk w/o X11 env behavior (see http://wiki.cpantesters.org/wiki/CPANAuthorNotes)
 	
 ---------------------------------------------------------------
 

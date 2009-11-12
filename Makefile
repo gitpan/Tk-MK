@@ -15,7 +15,7 @@
 #     DISTNAME => q[Tk-MK]
 #     NAME => q[Tk::MK]
 #     PREREQ_PM => { Tk=>q[804.027] }
-#     VERSION => q[0.20]
+#     VERSION => q[0.21]
 #     dist => { COMPRESS=>q[gzip -9f], SUFFIX=>q[gz] }
 
 # --- MakeMaker post_initialize section:
@@ -56,11 +56,11 @@ DIRFILESEP = /
 DFSEP = $(DIRFILESEP)
 NAME = Tk::MK
 NAME_SYM = Tk_MK
-VERSION = 0.20
+VERSION = 0.21
 VERSION_MACRO = VERSION
-VERSION_SYM = 0_20
+VERSION_SYM = 0_21
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 0.20
+XS_VERSION = 0.21
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -299,7 +299,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = Tk-MK
-DISTVNAME = Tk-MK-0.20
+DISTVNAME = Tk-MK-0.21
 
 
 # --- MakeMaker macro section:
@@ -544,7 +544,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
 	$(NOECHO) $(ECHO) '--- #YAML:1.0' > META_new.yml
 	$(NOECHO) $(ECHO) 'name:                Tk-MK' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version:             0.20' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version:             0.21' >> META_new.yml
 	$(NOECHO) $(ECHO) 'abstract:            Several Add-on widgets (CompoundButton, Buttonplus, HListplus, DHList, DTree, Checkbox, Optionbox, PopUpSelectBox, Statusbox, BootSplash, ProgressBarPlus & HdrResizeButton)' >> META_new.yml
 	$(NOECHO) $(ECHO) 'license:             ~' >> META_new.yml
 	$(NOECHO) $(ECHO) 'generated_by:        ExtUtils::MakeMaker version 6.36' >> META_new.yml
@@ -847,7 +847,7 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd:
-	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0,20,0,0">' > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0,21,0,0">' > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <TITLE>$(DISTNAME)</TITLE>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <ABSTRACT>Several Add-on widgets (CompoundButton, Buttonplus, HListplus, DHList, DTree, Checkbox, Optionbox, PopUpSelectBox, Statusbox, BootSplash, ProgressBarPlus & HdrResizeButton)</ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR>M. Krause</AUTHOR>' >> $(DISTNAME).ppd
