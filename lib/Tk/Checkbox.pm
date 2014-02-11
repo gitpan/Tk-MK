@@ -12,6 +12,7 @@
 ##            V2.5	19-Jul-2005 	Bugfix for noInitialCallback option - executed never if set. MK
 ##            V2.6	03-Apr-2007 	Added activeForeground option. MK
 ##            V2.7	14-Feb-2008 	Added -variable retrieval. MK
+##            V2.8	21-Sep-2011 	Added -background update during set for catching unchanged BGs due to earlier invisibility. MK
 ##
 ######################################## EOH ###########################################
 package Tk::Checkbox;
@@ -463,6 +464,8 @@ sub set {
 				$color = $this->cget ('-activebackground');
 			}
 		}
+		# Refresh background in case not yet applied due to not yet viewable
+		$canvas->configure( -background => $this->{m_Normalbackground});
 		#Prepare the checkmark foreground
 		$canvas->itemconfigure(
 				$this->{m_CheckMark},
@@ -583,7 +586,7 @@ Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 
-V2.6  (C) April 2007
+V2.8  (C) September 2011
 
 =cut
 

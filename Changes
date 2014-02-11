@@ -143,7 +143,20 @@ Revision history for Perl extension Tk-MK.
 0.21 Thu Nov 12 19:17:42 CET 2009
 
 	o Modified t/* tests to comply with new Tk w/o X11 env behavior (see http://wiki.cpantesters.org/wiki/CPANAuthorNotes)
-	
+
+
+0.22 Thu Apr 02 18:09:37 CET 2013
+
+	o New created widget Tk::Treeplus Widget
+		Treeplus is a Tree (and/or HList) replacement that supports Sorting,
+        Filtering and Resizing of columns and other gimmicks (e.g. selection history, ...)
+
+0.23 Thu Feb 06 19:09:21 CET 2014
+
+	o Improved widget Tk::Optionbox - Widget now supports a automatically created 'dummy' entry at the top
+		of the selection list, that will 'clear the value of the attached variable.
+		(Usable to clear also an attached label in case of emulating a combobox...
+
 ---------------------------------------------------------------
 
 TODO: Still some more work needed on the tests ...

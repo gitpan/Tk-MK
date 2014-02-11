@@ -1,7 +1,7 @@
 ######################################## SOH ###########################################
 ## Function : Additional Tk Class for Listbox-type HList with Data per Item, Sorting
 ##
-## Copyright (c) 2002-2009 Michael Krause. All rights reserved.
+## Copyright (c) 2002-2013 Michael Krause. All rights reserved.
 ## This program is free software; you can redistribute it and/or modify it
 ## under the same terms as Perl itself.
 ##
@@ -11,7 +11,8 @@
 ##            V1.1  13-May-2005 	Added missing data for sorting in column 2. MK
 ##            V1.2  23-Oct-2008 	Bugfix: Deleting the first entry messed the reverse func. MK
 ##            V2.0  11-Sep-2009 	Rewrite: Added multi-Column and Header support. MK
-##            V2.1  141-Sep-2009 	Bugfix: Solved problems with memory leak due Itemstyle. MK
+##            V2.1  14-Sep-2009 	Bugfix: Solved problems with memory leak due Itemstyle. MK
+##            V2.2  08-Apr-2013 	Bugfix: Retrieval of data this is a ref-to-* is lost (flattened in return-list). MK
 ##
 ######################################## EOH ###########################################
 package Tk::DHList;
@@ -27,7 +28,7 @@ use strict;
 use Carp;
 
 use vars qw ($VERSION);
-$VERSION = '2.1';
+$VERSION = '2.2';
 
 use base qw (Tk::Derived Tk::HList);
 
@@ -172,7 +173,7 @@ sub Populate
 # OVERRIDE: new ADD function
 #---------------------------------------------
 sub add 
-{
+{    
 	# Parameters
 	my ($this, $path, %args) = @_;
 
@@ -196,7 +197,7 @@ sub add
 	$col		= 0;
 
 	# Eventually split into additional columns
-	@line = split(/$pattern/, $args{-text}, $data_pos);
+	@line = split(/$pattern/, $args{-text}||'', $data_pos);
 
 	# Create a new entry
 	$this->SUPER::add($path, -data => $data);
@@ -524,7 +525,10 @@ sub _get_item
 		push @items_out, $this->{m_backlist}{$path}{args}{-text};
 	}
 	if ($mode & 2) {
-		push @items_out,  $this->infoData($path);
+		#push @items_out, $this->infoData($path);
+		### NOTE: IF we use above code an existing REF in data is LOST! MKr. 2013-04-08
+		my $data = $this->infoData($path);
+		push @items_out, $data;
 	}
 	
 	return wantarray ? @items_out : $items_out[0];

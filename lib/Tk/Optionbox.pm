@@ -16,6 +16,7 @@
 ##            V1.7  30-Sep-2005 	Added selection-validate operation. MK
 ##            V1.8  25-Sep-2006 	Added detection for loops, which might crash the app for linux. MK
 ##            V1.9  11-Mar-2009 	Added -popover 'cursor for popup() func. MK
+##            V2.0  06-Feb-2014 	Added '-clearoption*' function to automatically add a 'clear entry'. MK
 ##
 ######################################## EOH ###########################################
 package Tk::Optionbox;
@@ -32,12 +33,17 @@ use strict;
 use Carp qw(:DEFAULT cluck);
 
 use vars qw ($VERSION);
-$VERSION = '1.9';
+$VERSION = '2.0';
 
 use base qw (Tk::Derived Tk::Menubutton);
 
+
+use constant CLEAR_OPTION_TAG	=>	'__CLEAR__OPTIONBOX_ENTRY__';
+
 ########################################################################
 Tk::Widget->Construct ('Optionbox');
+
+my $ClearXPM;
 
 #---------------------------------------------
 sub ClassInit {
@@ -47,6 +53,48 @@ sub ClassInit {
 	$window->bind ($class, '<Control-Tab>','focusNext');
 	$window->bind ($class, '<Control-Shift-Tab>','focusPrev');
 	$window->bind ($class, '<Tab>', 'focus');
+
+	###################################################
+	# The following Image is borrowed from free
+	# Silk icon set 1.3 by Mark James
+	# http://www.famfamfam.com/lab/icons/silk/
+	###################################################
+	$ClearXPM = $window->Pixmap( -data =>  <<'ClearXPM_EOP'
+/* XPM */
+static char *cancel[] = {
+/* columns rows colors chars-per-pixel */
+"16 16 10 1",
+"  c #EE0000",
+". c #F70706",
+"X c #F9231D",
+"o c #FB3230",
+"O c #F84737",
+"+ c #FC504A",
+"@ c #FE6659",
+"# c #FECACA",
+"$ c #FFEFEF",
+"% c None",
+/* pixels */
+"%%%%%%%%%%%%%%%%",
+"%%%%....... %%%%",
+"%%% o@@@@+@X.%%%",
+"%% o@+ooooo@X %%",
+"%.o@+#+oo+#++X %",
+"%.@O#$$++$$#oO.%",
+"%.@o@$$$$$$oXO.%",
+"%.@oo+$$$$OX.O.%",
+"%.@oX+$$$$oX.+ %",
+"%.+o+$$$$$$o.O %",
+"%.+o#$$oo$$#Xo.%",
+"% X++#+..o#oOX %",
+"%% X+X.X..XoX %%",
+"%%% XOOOOOOX %%%",
+"%%%% ... .  %%%%",
+"%%%%%%%%%%%%%%%%"
+};
+ClearXPM_EOP
+	) unless $ClearXPM;
+
 }
 
 #---------------------------------------------
@@ -76,21 +124,29 @@ sub Populate {
 
 	# Setup DEFAULT Configs
 	%defaults = (
-    	-takefocus			=> ['SELF', 'takefocus', 'Takefocus', 1],
-    	-highlightthickness	=> ['SELF', 'highlightThickness', 'HighlightThickness', 1],
-    	-borderwidth		=> [['SELF', 'PASSIVE'], 'borderwidth', 'BorderWidth', 2],
-    	-relief				=> [['SELF', 'PASSIVE'], 'relief', 'Relief', 'raised'],
-    	-anchor				=> [['SELF', 'PASSIVE'], 'anchor', 'Anchor', 'w'],
-     	-direction 			=> [['SELF', 'PASSIVE'], 'direction', 'Direction', 'flush'],
-    	-font				=> [['SELF', 'PASSIVE'], 'font', 'Font', 'Helvetica 12 bold'],
-    	-variable 			=> ['PASSIVE', undef, undef, undef],
-    	-tearoff 			=> ['PASSIVE', 'tearoff', 'TearOff', 1],
-    	-rows	 			=> ['PASSIVE', 'rows', 'Rows', 20],
-    	-activate 			=> ['PASSIVE', 'activate', 'Activate', 1],
-    	-separator 			=> ['PASSIVE', 'separator', 'Separator', '.'],
-    	-options 			=> ['METHOD',  undef, undef, undef],
-    	-command 			=> ['CALLBACK',undef,undef,undef],
-    	-validatecommand	=> ['PASSIVE', 'validatecommand', 'ValidateCommand', sub {0}],
+    	-takefocus						=> ['SELF', 'takefocus', 'Takefocus', 1],
+    	-highlightthickness				=> ['SELF', 'highlightThickness', 'HighlightThickness', 1],
+    	-borderwidth					=> [['SELF', 'PASSIVE'], 'borderwidth', 'BorderWidth', 2],
+    	-relief							=> [['SELF', 'PASSIVE'], 'relief', 'Relief', 'raised'],
+    	-anchor							=> [['SELF', 'PASSIVE'], 'anchor', 'Anchor', 'w'],
+     	-direction 						=> [['SELF', 'PASSIVE'], 'direction', 'Direction', 'flush'],
+    	-font							=> [['SELF', 'PASSIVE'], 'font', 'Font', 'Helvetica 12 bold'],
+    	-variable 						=> ['PASSIVE', undef, undef, undef],
+    	-tearoff 						=> ['PASSIVE', 'tearoff', 'TearOff', 1],
+    	-rows	 						=> ['PASSIVE', 'rows', 'Rows', 20],
+    	-activate 						=> ['PASSIVE', 'activate', 'Activate', 1],
+    	-separator 						=> ['PASSIVE', 'separator', 'Separator', '.'],
+    	-options 						=> ['METHOD',  undef, undef, undef],
+    	-command 						=> ['CALLBACK',undef,undef,undef],
+    	-validatecommand				=> ['PASSIVE', 'validatecommand', 'ValidateCommand', sub {0}],
+		# automatic clear entry configs
+     	-clearoptionon					=> ['PASSIVE', 'clearoption', 'ClearOption', 0],
+     	-clearoptiontext				=> ['PASSIVE', 'clearoptiontext', 'Clearoptiontext', 'CLEAR OPTION'],
+     	-clearoptionimage				=> ['PASSIVE', 'clearoptionimage', 'Clearoptionimage', $ClearXPM],
+     	-clearoptionforeground			=> ['PASSIVE', 'clearoptionforeground', 'Clearoptionforeground', 'Black'],
+     	-clearoptionbackground			=> ['PASSIVE', 'clearoptionbackground', 'Clearoptionbackground', '#d9d9d9'],
+     	-clearoptionactiveforeground	=> ['PASSIVE', 'clearoptionactiveforeground', 'Clearoptionactiveforeground', 'Black'],
+     	-clearoptionactivebackground	=> ['PASSIVE', 'clearoptionactivebackground', 'Clearoptionactivebackground', '#ececec'],
 	);	
 	$this->ConfigSpecs(%defaults);
 
@@ -132,23 +188,26 @@ sub set_option
 {
 	# Parameters
 	my ($this, $label, $value, $full_label) = @_;
+	#print "DBG: variable [\$this, \$label, \$value, \$full_label] = >$this, $label, $value, $full_label<\n";
 	# Locals
 	my ($failed, $validatecommand, $variable, $textvariable, $old_label, $old_value);
 	
-	# Some presettings
-	$value = $label if @_ == 2;
-	$full_label = $label unless $full_label;
-
 	$validatecommand = $this->cget('-validatecommand');
 	$textvariable = $this->cget('-textvariable');
 	$variable = $this->cget('-variable');
 
 	$old_value = $variable ? $$variable : $this->{OldValue};
 	$old_label = $$textvariable;
+
+	# Some presettings
+	$value = $label if @_ == 2;
+	$full_label = $label unless $full_label;
+	$full_label = '' if $label eq CLEAR_OPTION_TAG();
 	
 	# Perform validate operation, if available
-	do { $failed = &$validatecommand ($this, $value, $label, $full_label, $old_value, $old_label) } if $validatecommand;
-	
+	do	{ $failed = &$validatecommand ($this, $value, $label, $full_label, $old_value, $old_label)
+		} if $validatecommand and $label ne CLEAR_OPTION_TAG();
+
 	#Do the changes
 	unless ($failed) {
 		$$variable = $value if $variable;
@@ -159,7 +218,7 @@ sub set_option
 		$this->{CallBackActive} = 1;
 		$this->Callback(-command => $value, $label, $full_label);
 		delete $this->{CallBackActive};
-	}
+	}	    
 }
 #---------------------------------------------
 my $FingerPrint;
@@ -193,8 +252,24 @@ sub add_options
 	$old = $$var;
 
 	($menu_items, $width, $first) = $this->generate_menu(undef, (ref $args[0] eq 'ARRAY') ? @{$args[0]} : @args);
-	push @{$this->{MenuItems}}, @$menu_items;
 
+	# Check for Auto-gen CLEAR entry
+	if ($this->cget('-clearoptionon')) {
+		my $clearoptiontext = $this->cget('-clearoptiontext');
+		unshift @$menu_items,	[ 'command', $clearoptiontext,
+									-command => sub { $this->set_option(CLEAR_OPTION_TAG(), '', '') },
+									#-columnbreak => $columnbreak,
+									-font => $font,
+									-foreground => $this->cget('-clearoptionforeground'),
+									-background => $this->cget('-clearoptionbackground'),
+									-activeforeground => $this->cget('-clearoptionactiveforeground'),
+									-activebackground => $this->cget('-clearoptionactivebackground'),
+									-image => $this->cget('-clearoptionimage'),
+									($clearoptiontext ? (-compound => 'left') : ()),
+								];
+	}
+
+	push @{$this->{MenuItems}}, @$menu_items;
 	$menu = $this->Menu(-menuitems => $this->{MenuItems});
  	$menu->configure(-font => $font);
 	$menu->configure(-tearoff => $this->cget('-tearoff') );
@@ -511,6 +586,30 @@ label & full-hierarchical label]. The f-h-label uses the specified separator. De
 It is invoked with B<the_widget>, B<value>, B<label>, B<full_label>, B<old_value> and B<old_label>.
 Returning B<FALSE> will reject the current selection.
 
+=item B<-clearoptionon>
+
+'-clearoptionon' expects 0/1 and rules whether the first option  in the pop'd up optionlist
+is an automatically created 'clear' entry which blanks the internal variable and returns
+'' to any assigned callback if clicked/selected
+
+=item B<-clearoptiontext> I<text> defines the text of the automatically created 'clear'
+entry (default 'CLEAR OPTION'). If the text is left blank only the image is shown
+
+=item B<-clearoptionimage> I<image> defines the image shown within the automatically created 'clear'
+entry (default a 'x' sign)
+
+=item B<-clearoptionforeground> color defines the foreground color of the automatically created 'clear'
+entry (default 'Black')
+
+=item B<-clearoptionbackground> color defines the background color of the automatically created 'clear'
+entry (default '#d9d9d9')
+
+=item B<-clearoptionactiveforeground> color defines the ACTIVE foreground color of the automatically created 'clear'
+entry (default 'Black')
+
+=item B<-clearoptionactivebackground> color defines the ACTIVE background color of the automatically created 'clear'
+entry (default '#ececec')
+
 =back
 
 Please see the TK:Optionmenu docs for details on all other aspects
@@ -523,7 +622,7 @@ Michael Krause, KrauseM_AT_gmx_DOT_net
 
 This code may be distributed under the same conditions as Perl.
 
-V1.8  (C) September 2006
+V2.0  (C) February 2014
 
 =cut
 

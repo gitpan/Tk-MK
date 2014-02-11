@@ -8,6 +8,7 @@ t/Buttonplus.t
 t/pod.t
 t/DHList.t
 t/CompoundButton.t
+t/Treeplus.t
 tests/checkbox_tst.pl
 tests/wtest.pl
 demos/xresource.xrdb
@@ -18,6 +19,7 @@ demos/demo_buttonplus.pl
 demos/demo_checkbox.pl
 demos/demo_compoundbutton.pl
 demos/demo_hlistplus.pl
+demos/demo_treeplus.pl
 Makefile.PL
 README
 Changes
@@ -37,4 +39,6 @@ lib/Tk/Statusbox.pm
 lib/Tk/CompoundButton.pm
 lib/Tk/DHList.pm
 lib/Tk/PopUpSelectBox.pm
-META.yml                                 Module meta-data (added by MakeMaker)
+lib/Tk/Treeplus.pm
+META.yml                                 Module YAML meta-data (added by MakeMaker)
+META.json                                Module JSON meta-data (added by MakeMaker)
